@@ -14,3 +14,8 @@ function transposeSheet()
   }
   s.getRange(1, 1, n.length, n[0].length).setValues(n);
 }
+
+function ave()
+{
+	return 2;
+}
