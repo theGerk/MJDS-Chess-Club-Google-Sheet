@@ -1,4 +1,8 @@
-function transposeSheet() {
+/// <reference path="Constants.ts"/>
+
+
+function transposeSheet()
+{
   var u = SpreadsheetApp.getUi();
   var s = SpreadsheetApp.getActive().getSheetByName('DEVSHEET');
   var v = s.getDataRange().getValues();

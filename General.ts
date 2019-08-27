@@ -1,3 +1,7 @@
-function myFunction() {
+/// <reference path="Constants.ts"/>
+
+
+function myFunction()
+{
   
 }
