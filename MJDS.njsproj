@@ -29,6 +29,9 @@
     <Content Include="appsscript.json" />
     <Content Include="package-lock.json" />
     <Content Include="package.json" />
+    <Content Include="tsconfig.json">
+      <SubType>Code</SubType>
+    </Content>
     <None Include="Code.old.ts" />
     <None Include="DevWork.ts" />
     <None Include="General.ts" />
@@ -38,9 +41,6 @@
     <Folder Include="MJDS" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Code.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="Constants.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

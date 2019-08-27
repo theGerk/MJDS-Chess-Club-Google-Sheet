@@ -6,6 +6,7 @@ const CONST = {
 	pages: {
 		master: {
 			name: 'Master Sheet',
+			storedWinSeperator: ', ',
 			columns: {
 				name: 0,
 				group: 1,
@@ -18,7 +19,7 @@ const CONST = {
 				gamesPlayed: 8,
 			},
 		},
-		main: {
+		active: {
 			name: 'Print Page',
 			columns: {
 				board: 0,
@@ -44,7 +45,8 @@ const CONST = {
 
 
 
-function initialize(inputObj: any)
+
+function initialize(inputObj: any): void
 {
 	let output: any[][] = [];
 	for (let current in inputObj)
