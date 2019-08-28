@@ -44,12 +44,55 @@ const CONST = {
 };
 
 
+/**
+ * Describes a single row in the master list.
+ */
+interface IEntryInMasterList
+{
+	/** The player's name (Unique ID). */
+	name: string;
+	/** The player's group (may be blank for no group). */
+	group: string;
+	/** The player's grade (K => kindergarden, A => above 12th grade, Pre-K => pre-kindergarden). */
+	grade: number | string;
+	/** The player's Lampert rating, using system developed by Larry Lampert. */
+	lampertRating: number;
+	/**
+	 * The player's glicko-2 rating (shifted).
+	 * Empty means no rating.
+	 */
+	glickoRating: number;
+	/** 
+	 * The player's glicko-2 rating deviation (shifted).
+	 * Empty means no rating.
+	 */
+	glickoDeviation: number;
+	/**
+	 * The player's glicko-2 variance.
+	 * Empty means no rating.
+	 */
+	glickoVariance: number;
+	/** Number of games player has played since start of 2019-20 year at the club. */
+	gamesPlayed: number;
+	/** A map from a player name to a number (1 or 2) giving the number of times the player has beaten them for ladder advancements. */
+	storedWins: { [name: string]: number };
+	/**
+	 * The row that a player appeared on in the master list.
+	 * Not to be used as an ID, may change between executions unexpectedly.
+	 */
+	row: number;
+}
 
 
-function initialize(inputObj: any): void
+
+/**
+ * Generates the entire master list from an input object, should never be used again.
+ * @param inputObj
+ */
+function initialize(inputObj: { [str: string]: { grade: number | string, group: string, name: string, rating: number, wins_updated: string[] } }): void
 {
 	let output: any[][] = [];
-	for (let current in inputObj)
+	for(let current in inputObj)
 	{
 		let c = inputObj[current];
 		let row = [];
