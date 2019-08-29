@@ -14,7 +14,7 @@ function getMasterListData()
 	for(let i = 1; i < data.length; i++)
 	{
 		let row = data[i];
-		let name = row[CONST.pages.master.name];
+		let name = row[CONST.pages.master.columns.name];
 
 		//check for redundancy
 		if(output.hasOwnProperty(name))
@@ -29,14 +29,14 @@ function getMasterListData()
 		if(storedWinsString)
 		{
 			let temp = storedWinsString.split(CONST.pages.master.storedWinSeperator);
-			for(let i = 0; i < temp.length; i++)
+			for(let j = 0; j < temp.length; j++)
 			{
-				let opponenet_name = temp[i].substring(0, temp[i].length - 2);
+				let opponenet_name = temp[j].substring(0, temp[j].length - 2);
 				//TODO add try catch around next line to allow for not having a number in the stored wins list for the master sheet
 				//Currently only allows "Harry Potter 1, Ginny Weasly 2"
 				//Should be equivalent to "Harry Potter, Ginny Weasly 2" or "Harry Potter 1, Ginny Weasly, Ginny Weasly"
 				//Update: Maybe don't do this as it prevents a name from ending with a number as in the case of "James Potter_0" and James Potter_1", maybe this isn't an issue but requires further thought.
-				let number = parseInt(temp[i].substring(temp[i].length - 1));
+				let number = parseInt(temp[j].substring(temp[j].length - 1));
 
 				if(storedWinsObject.hasOwnProperty(opponenet_name))
 					storedWinsObject[opponenet_name] += number;
@@ -45,7 +45,6 @@ function getMasterListData()
 			}
 		}
 
-
 		//set all the values
 		output[name] = {
 			name: name,
@@ -53,9 +52,9 @@ function getMasterListData()
 			grade: row[CONST.pages.master.columns.grade],
 			lampertRating: row[CONST.pages.master.columns.lampertRating],
 			gamesPlayed: row[CONST.pages.master.columns.gamesPlayed],
-			glickoDeviation: row[CONST.pages.master.columns.glickoRatingDeviation],
-			glickoRating: row[CONST.pages.master.columns.glickoRating],
-			glickoVariance: row[CONST.pages.master.columns.glickoRatingVariance],
+			glickoRating: row[CONST.pages.master.columns.glickoRating] || 0,
+			glickoDeviation: row[CONST.pages.master.columns.glickoRatingDeviation] || null,
+			glickoVariance: row[CONST.pages.master.columns.glickoRatingVariance] || 0,
 			row: i - 1,
 			storedWins: storedWinsObject
 		}
@@ -100,6 +99,11 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 	}
 
 
-
 	return output;
+}
+
+
+function getGamesPlayedData()
+{
+	let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.games.name).getDataRange().getValues();
 }

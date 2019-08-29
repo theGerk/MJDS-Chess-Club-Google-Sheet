@@ -1,0 +1,2 @@
+C:\Users\benji\source\repos\MJDS-Chess-Club-Google-Sheet\obj\Debug\MJDS.njsprojAssemblyReference.cache
+C:\Users\benji\source\repos\MJDS-Chess-Club-Google-Sheet\obj\Debug\MJDS.njsproj.CoreCompileInputs.cache

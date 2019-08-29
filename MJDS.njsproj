@@ -41,7 +41,13 @@
     <Folder Include="MJDS" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="FrontEndInterface.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Constants.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Ratings.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="UserControls.ts">

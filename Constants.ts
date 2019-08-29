@@ -40,6 +40,20 @@ const CONST = {
 				player2: 3,
 			},
 		},
+		attendance: {
+			template: 'Attendance-Template',
+			columns: {
+				name: 0,
+				attend: 1,
+			},
+			name: 'Attendance',
+		},
+	},
+	gradeAdvancement: {
+		'Pre-K': 'K',
+		'K': 1,
+		12: 'A',
+		'A': 'A',
 	},
 };
 
@@ -81,31 +95,4 @@ interface IEntryInMasterList
 	 * Not to be used as an ID, may change between executions unexpectedly.
 	 */
 	row: number;
-}
-
-
-
-/**
- * Generates the entire master list from an input object, should never be used again.
- * @param inputObj
- */
-function initialize(inputObj: { [str: string]: { grade: number | string, group: string, name: string, rating: number, wins_updated: string[] } }): void
-{
-	let output: any[][] = [];
-	for(let current in inputObj)
-	{
-		let c = inputObj[current];
-		let row = [];
-		row[CONST.pages.master.columns.gamesPlayed] = 0;
-		row[CONST.pages.master.columns.grade] = c.grade;
-		row[CONST.pages.master.columns.group] = c.group;
-		row[CONST.pages.master.columns.lampertRating] = c.rating;
-		row[CONST.pages.master.columns.name] = c.name;
-		row[CONST.pages.master.columns.storedWins] = c.wins_updated.join(', ');
-		row[CONST.pages.master.columns.glickoRating] = "";
-		row[CONST.pages.master.columns.glickoRatingDeviation] = "";
-		row[CONST.pages.master.columns.glickoRatingVariance] = "";
-		output.push(row);
-	}
-	SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name).getRange(2, 1, output.length, output[0].length).setValues(output);
 }
