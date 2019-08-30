@@ -174,3 +174,13 @@ function getAttendanceSheetData(): string[] {
     }
     return output;
 }
+
+
+interface IActivePlayer {
+    name: string;
+    board: number;
+    previousWins: number[];
+    lampertRating: number;
+    glickoRating: {}
+}
+function getActivePlayerData(): 
