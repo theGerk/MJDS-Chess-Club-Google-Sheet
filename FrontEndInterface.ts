@@ -158,3 +158,19 @@ function getGamesPlayedData(): IGamePlayed[] {
     }
     return output;
 }
+
+/**
+ * Returns array of all players who were signed in
+ * 
+ * @returns array of players signed in
+ */
+function getAttendanceSheetData(): string[] {
+    let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.attendance.name).getDataRange().getValues();
+    let output: string[] = [];
+    for (let i = 1; i < data.length; i++) {
+        let currentRow = data[i];
+        if (currentRow[CONST.pages.attendance.columns.attend])
+            output.push(currentRow[CONST.pages.attendance.columns.name]);
+    }
+    return output;
+}
