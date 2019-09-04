@@ -1,4 +1,4 @@
-﻿///<reference path="../Constants.ts"/>
+﻿///<reference path="Constants.ts"/>
 
 
 interface IGlicko
