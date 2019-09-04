@@ -1,4 +1,12 @@
-﻿///<reference path="../Constants.ts"/>
+﻿///<reference path="Constants.ts"/>
+
+function test()
+{
+	let w: Lampert.IRating = { rating: 10 };
+	Lampert.match(w, { rating: 100 }, .5);
+	SpreadsheetApp.getUi().alert(`${w.rating}`);
+}
+
 
 /** Namespace for lampert rating system and all its math */
 namespace Lampert
