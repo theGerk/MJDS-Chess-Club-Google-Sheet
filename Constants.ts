@@ -63,4 +63,11 @@ const CONST = {
 		12: 'A',
 		'A': 'A',
 	},
+	ratings: {
+		lampert: {
+			ratio: .1,
+			minimumGainOnWin: 1,
+			maximumGainOnWin: 100,
+		},
+	},
 };

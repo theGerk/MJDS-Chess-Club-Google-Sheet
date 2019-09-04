@@ -133,7 +133,7 @@ interface IGamePlayed {
     white: string;
     /** Black player's name */
     black: string;
-    /** Result for white */
+    /** Result for white (1 => win, .5 => draw, 0 => loss)*/
     result: number;
     /** Timestamp, may not be used */
     timestamp: number;
@@ -176,11 +176,35 @@ function getAttendanceSheetData(): string[] {
 }
 
 
-interface IActivePlayer {
+interface IActivePlayerData {
     name: string;
     board: number;
     previousWins: number[];
-    lampertRating: number;
-    glickoRating: {}
+	lampertRating: number;
+	group: string;
+	grade: string | number;
+	points: number;
+	missed: boolean;
 }
-function getActivePlayerData(): 
+
+
+function getActivePlayerData()
+{
+	let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.active.name).getDataRange().getValues();
+	let output: IActivePlayerData[] = [];
+	for(let i = 1; i < data.length; i++)
+	{
+		let currentRow = data[i];
+		output.push({
+			name: currentRow[CONST.pages.active.columns.name],
+			board: currentRow[CONST.pages.active.columns.board],
+			previousWins: currentRow.slice(CONST.pages.active.columns.wins),
+			lampertRating: currentRow[CONST.pages.active.columns.rating],
+			grade: currentRow[CONST.pages.active.columns.grade],
+			group: currentRow[CONST.pages.active.columns.group],
+			points: currentRow[CONST.pages.active.columns.points],
+			missed: currentRow[CONST.pages.active.columns.missed]
+		});
+	}
+	return output;
+}
