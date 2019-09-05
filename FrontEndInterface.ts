@@ -40,6 +40,88 @@ namespace FrontEnd
 		row: number;
 	}
 
+	/** What a master list object looks like */
+	export interface IMasterListObject { [name: string]: IEntryInMasterList };
+
+
+	/**
+	 * rewrites the entire master sheet
+	 * @param masterListData An IMasterListObject, this is what the master list will be set as
+	 * @param write Can be left blank or false for testing where changes are not desired
+	 * @returns Can be used for testing, generally to be treated as a void function
+	 */
+	export function writeMasterListData(masterListData: IMasterListObject, write?: boolean)
+	{
+		//Without the Set class, using an object as a set seems sufficent
+
+		//maps old name to new name
+		let oldToNew_NameMap: { [name: string]: string } = {};
+		//maps new name to old name
+		let newToOld_NameMap: { [name: string]: string } = {};
+
+		//first set up name map
+		for(let initialName in masterListData)
+		{
+			if(initialName !== masterListData[initialName].name)
+			{
+				//checks to see if the name is already a new name
+				if(newToOld_NameMap.hasOwnProperty(masterListData[initialName].name))
+				{
+					throw new Error(`The name ${masterListData[initialName].name} is being given twice. Can not write master list with duplicate names!`);
+				}
+
+
+				oldToNew_NameMap[initialName] = masterListData[initialName].name;
+				newToOld_NameMap[masterListData[initialName].name] = initialName;
+			}
+		}
+
+		//now check for any new name conflicts with old names
+		for(let newName in newToOld_NameMap)
+		{
+			if(masterListData.hasOwnProperty(newName) && !oldToNew_NameMap.hasOwnProperty(newName))
+			{
+				throw new Error(`The name ${newName} already exists in master list. Can not write master list with duplicate names!`);
+			}
+		}
+
+
+		//everything seems okay, lets create output object
+		let output: any[][] = [];
+		for(let initialName in masterListData)
+		{
+			let readRow = masterListData[initialName];
+			let writeRow = [];
+			writeRow[CONST.pages.master.columns.gamesPlayed] = readRow.gamesPlayed;
+			writeRow[CONST.pages.master.columns.grade] = readRow.grade;
+			writeRow[CONST.pages.master.columns.group] = readRow.group;
+			writeRow[CONST.pages.master.columns.lampertRating] = readRow.lampertRating;
+			writeRow[CONST.pages.master.columns.name] = readRow.name;
+			writeRow[CONST.pages.master.columns.glickoRating] = readRow.glickoRating;
+			writeRow[CONST.pages.master.columns.glickoRatingDeviation] = readRow.glickoDeviation;
+			writeRow[CONST.pages.master.columns.glickoRatingVariance] = readRow.glickoVariance;
+
+			let winsArray: string[] = [];
+			for(let opponentName in readRow.storedWins)
+			{
+				let winName = newToOld_NameMap.hasOwnProperty(opponentName) ? newToOld_NameMap[opponentName] : opponentName;
+				let winCount = readRow.storedWins[opponentName];
+				winsArray.push(winName + ' ' + winCount);
+			}
+
+			writeRow[CONST.pages.master.columns.storedWins] = winsArray.join(CONST.pages.master.storedWinSeperator);
+			output.push(writeRow);
+		}
+
+		if(write)
+		{
+			let sheet = SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name);
+			sheet.getDataRange().offset(1, 0).clearContent();
+			sheet.getRange(2, 1, output.length, output[0].length).setValues(output);
+		}
+		return output;
+	}
+
 	/**
 	 * Gets all the data stored in the master list as a single object
 	 * 
@@ -48,7 +130,7 @@ namespace FrontEnd
 	export function getMasterListData()
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name).getDataRange().getValues();
-		let output: { [name: string]: IEntryInMasterList } = {};
+		let output: IMasterListObject = {};
 		for(let i = 1; i < data.length; i++)
 		{
 			let row = data[i];
@@ -162,7 +244,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.games.name).getDataRange().getValues();
 		let output: IGamePlayed[] = [];
-		for(let i = 1; data[i][CONST.pages.games.columns.GameNumber]; i++)
+		for(let i = 1; i < data.length && data[i][CONST.pages.games.columns.GameNumber]; i++)
 		{
 			let currentRow = data[i];
 			output.push({
@@ -194,19 +276,28 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 	}
 
 
+	/** All data held on master sheet about an active player */
 	export interface IActivePlayerData
 	{
+		/** Name [Unique] */
 		name: string;
+		/** Board number, this is unique but also changes */
 		board: number;
+		/** array refering the the number of wins against people above them and losses to those below */
 		previousWins: number[];
+		/** The Lampert Rating */
 		lampertRating: number;
+		/** The group */
 		group: string;
+		/** The grade */
 		grade: string | number;
+		/** The number of points */
 		points: number;
+		/** Did they miss last session? */
 		missed: boolean;
 	}
 
-
+	/** gets all data from the active players page */
 	export function getActivePlayerData()
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.active.name).getDataRange().getValues();
@@ -223,6 +314,34 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 				group: currentRow[CONST.pages.active.columns.group],
 				points: currentRow[CONST.pages.active.columns.points],
 				missed: currentRow[CONST.pages.active.columns.missed]
+			});
+		}
+		return output;
+	}
+
+	/** All data for a single row from new player page */
+	export interface INewPlayerData
+	{
+		/** Name [Unique] */
+		name: string;
+		/** grade */
+		grade: string | number;
+		/** group */
+		group: string;
+	}
+
+	/** Gets all data from new player sheet and returns it as an array */
+	export function getNewPlayerData()
+	{
+		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.newPlayers.name).getDataRange().getValues();
+		let output: INewPlayerData[] = [];
+		for(let i = 0; i < data.length && data[i][CONST.pages.newPlayers.columns.name]; i++)
+		{
+			let currentRow = data[i];
+			output.push({
+				name: currentRow[CONST.pages.newPlayers.columns.name],
+				grade: currentRow[CONST.pages.newPlayers.columns.grade],
+				group: currentRow[CONST.pages.newPlayers.columns.group]
 			});
 		}
 		return output;

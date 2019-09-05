@@ -1,5 +1,6 @@
 ﻿//references
 /// <reference path="node_modules/@types/google-apps-script/index.d.ts"/>
+/// <reference path="TemplatePages.ts"/>
 
 
 
@@ -59,12 +60,14 @@ const CONST = {
 			name: 'Attendance',
 		},
 		newPlayers: {
-			name: 'New Players',
+			template: 'UpdatePlayers-Template',
 			columns: {
 				name: 0,
 				group: 1,
 				grade: 2,
 			},
+			name: 'Update Players',
+			defaultRows: 20,
 		},
 	},
 	gradeAdvancement: {

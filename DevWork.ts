@@ -43,7 +43,7 @@ function initialize(inputObj: { [str: string]: { grade: number | string, group: 
 		row[CONST.pages.master.columns.group] = c.group;
 		row[CONST.pages.master.columns.lampertRating] = c.rating;
 		row[CONST.pages.master.columns.name] = c.name;
-		row[CONST.pages.master.columns.storedWins] = c.wins_updated.join(', ');
+		row[CONST.pages.master.columns.storedWins] = c.wins_updated.join(CONST.pages.master.storedWinSeperator);
 		row[CONST.pages.master.columns.glickoRating] = null;
 		row[CONST.pages.master.columns.glickoRatingDeviation] = null;
 		row[CONST.pages.master.columns.glickoRatingVariance] = null;
@@ -52,7 +52,7 @@ function initialize(inputObj: { [str: string]: { grade: number | string, group: 
 	SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name).getRange(2, 1, output.length, output[0].length).setValues(output);
 }
 
-function testFunction()
+function testRatings()
 {
 	let activeData = FrontEnd.getActivePlayerData();
 	let games = FrontEnd.getGamesPlayedData();
@@ -79,4 +79,9 @@ function testFunction()
 	}
 	Logger.log(`Average: ${sum / count}`);
 	SpreadsheetApp.getUi().alert(JSON.stringify(data));
+}
+
+function testFunction()
+{
+	makeUpdatePlayersPage();
 }
