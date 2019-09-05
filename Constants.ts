@@ -2,6 +2,7 @@
 /// <reference path="node_modules/@types/google-apps-script/index.d.ts"/>
 
 
+
 const CONST = {
 	pages: {
 		master: {
@@ -56,6 +57,14 @@ const CONST = {
 				attend: 1,
 			},
 			name: 'Attendance',
+		},
+		newPlayers: {
+			name: 'New Players',
+			columns: {
+				name: 0,
+				group: 1,
+				grade: 2,
+			},
 		},
 	},
 	gradeAdvancement: {
