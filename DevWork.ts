@@ -51,3 +51,32 @@ function initialize(inputObj: { [str: string]: { grade: number | string, group: 
 	}
 	SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name).getRange(2, 1, output.length, output[0].length).setValues(output);
 }
+
+function testFunction()
+{
+	let activeData = FrontEnd.getActivePlayerData();
+	let games = FrontEnd.getGamesPlayedData();
+
+	let data: { [name: string]: Lampert.IRating } = {};
+	for(let i = 0; i < activeData.length; i++)
+	{
+		let current = activeData[i];
+		data[current.name] = { rating: current.lampertRating };
+	}
+
+	for(let i = 0; i < games.length; i++)
+	{
+		let current = games[i];
+		Lampert.match(data[current.white], data[current.black], current.result);
+	}
+
+	let sum = 0;
+	let count = 0;
+	for(let name in data)
+	{
+		sum += data[name].rating;
+		count++;
+	}
+	Logger.log(`Average: ${sum / count}`);
+	SpreadsheetApp.getUi().alert(JSON.stringify(data));
+}

@@ -1,9 +1,11 @@
 ﻿///<reference path="Constants.ts"/>
 
-
-interface IGlicko
+namespace Glicko
 {
-	rating: number;
-	deviation: number;
-	variance: number;
+	export interface IGlicko
+	{
+		rating: number;
+		deviation: number;
+		variance: number;
+	}
 }

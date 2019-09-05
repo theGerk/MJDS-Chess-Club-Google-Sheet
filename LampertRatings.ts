@@ -43,9 +43,9 @@ namespace Lampert
 
 			case 1:	//white won
 				if(white.rating > black.rating) //if winner has higher rating
-					diff = Math.max(50 - diff, MAXIMUM_SWING);
+					diff = Math.max(50 - diff, MINIMUM_SWING);
 				else                //if looser has higher rating
-					diff = Math.min(50 + diff, MINIMUM_SWING);
+					diff = Math.min(50 + diff, MAXIMUM_SWING);
 				white.rating += diff;
 				black.rating -= diff;
 				return;

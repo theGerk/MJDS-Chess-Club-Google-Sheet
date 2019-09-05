@@ -10,7 +10,7 @@ function addPlayers(): void
 {
 	let spreadsheet = SpreadsheetApp.getActive();
 	let ui = SpreadsheetApp.getUi();
-	let masterListData = getMasterListData();
+	let masterListData = FrontEnd.getMasterListData();
 	let response: GoogleAppsScript.Base.PromptResponse;
 	do
 	{

@@ -35,17 +35,18 @@ const CONST = {
 		games: {
 			name: 'Games Played',
 			columns: {
+				GameNumber: 0,
 				white: 1,
 				result: 2,
 				black: 3,
             },
             resultMap: {
-                'W': 1,
-                'D': .5,
-                'L': 0,
-                1: 'W',
-                .5: 'D',
-                0: 'L',
+                'Win': 1,
+                'Draw': .5,
+                'Loss': 0,
+                1: 'Win',
+                .5: 'Draw',
+                0: 'Loss',
             },
 		},
 		attendance: {
