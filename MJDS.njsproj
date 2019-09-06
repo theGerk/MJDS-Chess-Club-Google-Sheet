@@ -26,6 +26,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".clasp.json" />
+    <Content Include=".gitignore" />
     <Content Include="appsscript.json" />
     <Content Include="package-lock.json" />
     <Content Include="package.json" />
@@ -47,9 +48,9 @@
     <TypeScriptCompile Include="Constants.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Ratings.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="GlickoRatings.ts" />
+    <TypeScriptCompile Include="LampertRatings.ts" />
+    <TypeScriptCompile Include="TemplatePages.ts" />
     <TypeScriptCompile Include="UserControls.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
