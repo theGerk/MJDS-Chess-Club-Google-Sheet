@@ -1,8 +1,45 @@
 ﻿/// <reference path="Constants.ts"/>
 
-
+/** Namespace for functions that deal with the google sheet directly */
 namespace FrontEnd
 {
+	/** Represents the most general player */
+	export interface IPlayer
+	{
+		name: string;
+		boardNumber: number;
+		grade: string | number;
+		group: string;
+		gamesPlayed: number;
+		storedWinsMap: { [name: string]: number };
+		storedWinsArray: number[];
+		isActive: boolean;
+		glicko: Glicko.IRating;
+		lampert: Lampert.IRating;
+	}
+
+	export interface IClubObject { [name: string]: IPlayer }
+
+	export function getClub(): IClubObject
+	{
+
+	}
+
+	export function getActiveClub(): IPlayer[]
+	{
+
+	}
+
+	export function setClub(club: IClubObject)
+	{
+
+	}
+
+	export function updateClub(club: IClubObject)
+	{
+
+	}
+
 	/** Describes a single row in the master list. */
 	export interface IEntryInMasterList
 	{
@@ -41,16 +78,15 @@ namespace FrontEnd
 	}
 
 	/** What a master list object looks like */
-	export interface IMasterListObject { [name: string]: IEntryInMasterList };
-
+	export interface IMasterListObject { [name: string]: IEntryInMasterList }
 
 	/**
-	 * rewrites the entire master sheet
+	 * Rewrites the entire master sheet
 	 * @param masterListData An IMasterListObject, this is what the master list will be set as
 	 * @param write Can be left blank or false for testing where changes are not desired
 	 * @returns Can be used for testing, generally to be treated as a void function
 	 */
-	export function writeMasterListData(masterListData: IMasterListObject, write?: boolean)
+	function writeMasterListData(masterListData: IMasterListObject, write?: boolean)
 	{
 		//Without the Set class, using an object as a set seems sufficent
 
@@ -274,7 +310,6 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		}
 		return output;
 	}
-
 
 	/** All data held on master sheet about an active player */
 	export interface IActivePlayerData

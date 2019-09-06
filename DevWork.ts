@@ -61,7 +61,7 @@ function testRatings()
 	for(let i = 0; i < activeData.length; i++)
 	{
 		let current = activeData[i];
-		data[current.name] = { rating: current.lampertRating };
+		//data[current.name] = { rating: current.lampertRating };
 	}
 
 	for(let i = 0; i < games.length; i++)

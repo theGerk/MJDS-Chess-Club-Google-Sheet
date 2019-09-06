@@ -2,7 +2,7 @@
 
 namespace Glicko
 {
-	export interface IGlicko
+	export interface IRating
 	{
 		rating: number;
 		deviation: number;
