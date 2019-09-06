@@ -6,38 +6,130 @@ namespace FrontEnd
 	/** Represents the most general player */
 	export interface IPlayer
 	{
+		/** Player name [Unique] */
 		name: string;
+		/** Board number, null if inactive (part of active player data) */
 		boardNumber: number;
+		/** grade */
 		grade: string | number;
+		/** group */
 		group: string;
+		/** number of games played so far */
 		gamesPlayed: number;
+		/** Stored wins, as they may be found from the master list as a map */
 		storedWinsMap: { [name: string]: number };
+		/** Stored wins as an array, only exists if the player is currently active, otherwise null (part of active player data) */
 		storedWinsArray: number[];
+		/** is the player active? */
 		isActive: boolean;
+		/** An object for the player's glicko rating */
 		glicko: Glicko.IRating;
+		/** An object for the player's Lampert rating */
 		lampert: Lampert.IRating;
+		/** Was the player abset last week (part of active player data) */
+		absent: boolean;
 	}
 
-	export interface IClubObject { [name: string]: IPlayer }
 
+	/** A single object representing the entire club */
+	export interface IClubObject
+	{
+		Master: { [name: string]: IPlayer };
+		Active: IPlayer[];
+	}
+
+
+	//TODO make function
 	export function getClub(): IClubObject
 	{
+		let masterList = getMasterListData();
+		let output: IClubObject = {
+			Master: {},
+			Active: []
+		};
 
+		//first generate object from master list assuming everyone is not in the club
+		for(let name in masterList)
+		{
+			let currentRow = masterList[name];
+			output.Master[name] = {
+				name: currentRow.name,
+				boardNumber: null,
+				grade: currentRow.grade,
+				group: currentRow.group,
+				gamesPlayed: currentRow.gamesPlayed,
+				storedWinsMap: currentRow.storedWins,
+				storedWinsArray: null,
+				isActive: false,
+				glicko: {
+					rating: currentRow.glickoRating,
+					deviation: currentRow.glickoDeviation,
+					variance: currentRow.glickoVariance
+				},
+				lampert: { rating: currentRow.lampertRating },
+				absent: null
+			}
+		}
+
+		//now add in data for active players
+		let activeList = getActivePlayerData();
+
+		for(let i = 0; i < activeList.length; i++)
+		{
+			let currentRow = activeList[i];
+
+			//first check to make sure the person is in output
+			if(!output.Master.hasOwnProperty(currentRow.name))
+				throw new Error(`Player: ${currentRow.name} on board ${currentRow.board} is in the active club, but not the master list!`);
+
+			let currentPlayer = output.Master[currentRow.name];
+
+			//now check to make sure the person was not already covered in active players (check for no duplicates)
+			if(currentPlayer.isActive)
+				throw new Error(`Player: ${currentRow.name} appears twice in active club, on both boards: ${output.Master[currentRow.name].boardNumber} and ${currentRow.board}.`);
+
+			//now we are good to set the active data
+			currentPlayer.boardNumber = currentRow.board;
+			currentPlayer.isActive = true;
+			currentPlayer.absent = currentRow.absent;
+			currentPlayer.storedWinsArray = currentRow.storedWins;
+
+			//add to the active array
+			output.Active[currentRow.board] = currentPlayer;
+		}
 	}
 
-	export function getActiveClub(): IPlayer[]
-	{
-
-	}
-
+	//TODO make function
 	export function setClub(club: IClubObject)
 	{
 
 	}
 
-	export function updateClub(club: IClubObject)
+	function convertStoredWinsObjectToArray(input: { [name: string]: number }, club: IClubObject)
 	{
+		let boardToNameMap: string[] = [];
 
+		let output: number[] = [];
+		for(var name in input)
+		{
+			if(!club.hasOwnProperty(name))
+				throw new Error(`club does not have player with name: ${name}`);
+
+			if(club[name].boardNumber)
+				output[club[name].boardNumber - 1] = input[name];
+		}
+		return output;
+	}
+
+	function convertStoredWinsArrayToObject(input: number[], club: IPlayer[])
+	{
+		let output: { [name: string]: number } = {};
+		for(var i = 0; i < input.length && i < club.length; i++)
+		{
+			if(input[i] > 0)
+				output[club[i].name] = input[i];
+		}
+		return output;
 	}
 
 	/** Describes a single row in the master list. */
@@ -319,7 +411,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		/** Board number, this is unique but also changes */
 		board: number;
 		/** array refering the the number of wins against people above them and losses to those below */
-		previousWins: number[];
+		storedWins: number[];
 		/** The Lampert Rating */
 		lampertRating: number;
 		/** The group */
@@ -329,7 +421,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		/** The number of points */
 		points: number;
 		/** Did they miss last session? */
-		missed: boolean;
+		absent: boolean;
 	}
 
 	/** gets all data from the active players page */
@@ -340,15 +432,17 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		for(let i = 1; i < data.length; i++)
 		{
 			let currentRow = data[i];
+			/** The current board number */
+			let board = currentRow[CONST.pages.active.columns.board];
 			output.push({
 				name: currentRow[CONST.pages.active.columns.name],
-				board: currentRow[CONST.pages.active.columns.board],
-				previousWins: currentRow.slice(CONST.pages.active.columns.wins),
+				board: board,
+				storedWins: currentRow.slice(CONST.pages.active.columns.wins, CONST.pages.active.columns.wins + board - 1),
 				lampertRating: currentRow[CONST.pages.active.columns.rating],
 				grade: currentRow[CONST.pages.active.columns.grade],
 				group: currentRow[CONST.pages.active.columns.group],
 				points: currentRow[CONST.pages.active.columns.points],
-				missed: currentRow[CONST.pages.active.columns.missed]
+				absent: currentRow[CONST.pages.active.columns.missed]
 			});
 		}
 		return output;
