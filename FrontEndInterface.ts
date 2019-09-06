@@ -17,9 +17,7 @@ namespace FrontEnd
 		/** number of games played so far */
 		gamesPlayed: number;
 		/** Stored wins, as they may be found from the master list as a map */
-		storedWinsMap: { [name: string]: number };
-		/** Stored wins as an array, only exists if the player is currently active, otherwise null (part of active player data) */
-		storedWinsArray: number[];
+		storedWins: { [name: string]: number };
 		/** is the player active? */
 		isActive: boolean;
 		/** An object for the player's glicko rating */
@@ -31,15 +29,16 @@ namespace FrontEnd
 	}
 
 
-	/** A single object representing the entire club */
+	/** A single object representing the entire club. Members of and Active should both refrence the same object, they should not be copies. */
 	export interface IClubObject
 	{
+		/** A map from names to player */
 		Master: { [name: string]: IPlayer };
+		/** An array of active players in board number order */
 		Active: IPlayer[];
 	}
 
-
-	//TODO make function
+	/** Gets all of the players in the club as a nice object */
 	export function getClub(): IClubObject
 	{
 		let masterList = getMasterListData();
@@ -58,8 +57,7 @@ namespace FrontEnd
 				grade: currentRow.grade,
 				group: currentRow.group,
 				gamesPlayed: currentRow.gamesPlayed,
-				storedWinsMap: currentRow.storedWins,
-				storedWinsArray: null,
+				storedWins: currentRow.storedWins,
 				isActive: false,
 				glicko: {
 					rating: currentRow.glickoRating,
@@ -92,11 +90,12 @@ namespace FrontEnd
 			currentPlayer.boardNumber = currentRow.board;
 			currentPlayer.isActive = true;
 			currentPlayer.absent = currentRow.absent;
-			currentPlayer.storedWinsArray = currentRow.storedWins;
 
 			//add to the active array
 			output.Active[currentRow.board] = currentPlayer;
 		}
+
+		return output;
 	}
 
 	//TODO make function
@@ -105,10 +104,13 @@ namespace FrontEnd
 
 	}
 
-	function convertStoredWinsObjectToArray(input: { [name: string]: number }, club: IClubObject)
+	/**
+	 * Converts an object mapping names to wins to an array format that is used on the final page
+	 * @param input the object mapping names to wins
+	 * @param club the object representing the entire club
+	 */
+	function convertStoredWinsObjectToArray(input: { [name: string]: number }, club: { [name: string]: IPlayer })
 	{
-		let boardToNameMap: string[] = [];
-
 		let output: number[] = [];
 		for(var name in input)
 		{
@@ -121,6 +123,13 @@ namespace FrontEnd
 		return output;
 	}
 
+
+	//Not sure if ever to be used
+	/**
+	 * Converts input to a map from names to win count based on board numbers in club object
+	 * @param input An array with meaning that player on board i + 1 has been beated input[i] times.
+	 * @param club An array with the meaning that player at club[i] has board i in the club.
+	 */
 	function convertStoredWinsArrayToObject(input: number[], club: IPlayer[])
 	{
 		let output: { [name: string]: number } = {};
