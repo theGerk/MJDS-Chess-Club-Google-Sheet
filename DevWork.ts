@@ -61,14 +61,20 @@ function testRatings()
 	for(let i = 0; i < activeData.length; i++)
 	{
 		let current = activeData[i];
-		//data[current.name] = { rating: current.lampertRating };
+		data[current.name] = { rating: current.lampertRating };
 	}
 
+	let s = SpreadsheetApp.getActive();
+	let output1: any[][] = [['winner', 'old rating', 'new rating', 'looser','old rating', 'new rating']]
 	for(let i = 0; i < games.length; i++)
 	{
 		let current = games[i];
+		let t1 = data[current.white].rating;
+		let t2 = data[current.black].rating;
 		Lampert.match(data[current.white], data[current.black], current.result);
+		output1.push([current.white, t1, data[current.white].rating, current.black, t2, data[current.black].rating]);
 	}
+	s.getSheetByName('by game').getRange(1, 1, output1.length, output1[0].length).setValues(output1);
 
 	let sum = 0;
 	let count = 0;
@@ -77,11 +83,15 @@ function testRatings()
 		sum += data[name].rating;
 		count++;
 	}
-	Logger.log(`Average: ${sum / count}`);
-	SpreadsheetApp.getUi().alert(JSON.stringify(data));
+	let output: any[][] = [['name', 'computer'];
+	for(let name in data)
+	{
+		output.push([name, data[name].rating]);
+	}
+	s.getSheetByName('ratings').getRange(1, 1, output.length, output[0].length).setValues(output);
 }
 
 function testFunction()
 {
-	makeUpdatePlayersPage();
+	testRatings();
 }
