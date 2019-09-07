@@ -3,46 +3,14 @@
 /** Namespace for functions that deal with the google sheet directly */
 namespace FrontEnd
 {
-	/** Represents the most general player */
-	export interface IPlayer
-	{
-		/** Player name [Unique] */
-		name: string;
-		/** Board number, null if inactive (part of active player data) */
-		boardNumber: number;
-		/** grade */
-		grade: string | number;
-		/** group */
-		group: string;
-		/** number of games played so far */
-		gamesPlayed: number;
-		/** Stored wins, as they may be found from the master list as a map */
-		storedWins: { [name: string]: number };
-		/** is the player active? */
-		isActive: boolean;
-		/** An object for the player's glicko rating */
-		glicko: Glicko.IRating;
-		/** An object for the player's Lampert rating */
-		lampert: Lampert.IRating;
-		/** Was the player abset last week (part of active player data) */
-		absent: boolean;
-	}
-
-
-	/** A single object representing the entire club. Members of and Active should both refrence the same object, they should not be copies. */
-	export interface IClubObject
-	{
-		/** A map from names to player */
-		Master: { [name: string]: IPlayer };
-		/** An array of active players in board number order */
-		Active: IPlayer[];
-	}
-
-	/** Gets all of the players in the club as a nice object */
-	export function getClub(): IClubObject
+	/** 
+	 *  Gets all of the players in the club as a nice object
+	 *  @returns the entire club as an object
+	 */
+	export function getClub(): IClub
 	{
 		let masterList = getMasterListData();
-		let output: IClubObject = {
+		let output: IClub = {
 			Master: {},
 			Active: []
 		};
@@ -50,23 +18,7 @@ namespace FrontEnd
 		//first generate object from master list assuming everyone is not in the club
 		for(let name in masterList)
 		{
-			let currentRow = masterList[name];
-			output.Master[name] = {
-				name: currentRow.name,
-				boardNumber: null,
-				grade: currentRow.grade,
-				group: currentRow.group,
-				gamesPlayed: currentRow.gamesPlayed,
-				storedWins: currentRow.storedWins,
-				isActive: false,
-				glicko: {
-					rating: currentRow.glickoRating,
-					deviation: currentRow.glickoDeviation,
-					variance: currentRow.glickoVariance
-				},
-				lampert: { rating: currentRow.lampertRating },
-				absent: null
-			}
+			output.Master[name] = convertIEntryInMasterListToIPlayer(masterList[name]);
 		}
 
 		//now add in data for active players
@@ -90,18 +42,31 @@ namespace FrontEnd
 			currentPlayer.boardNumber = currentRow.board;
 			currentPlayer.isActive = true;
 			currentPlayer.absent = currentRow.absent;
+			currentPlayer.points = currentPlayer.points;
 
 			//add to the active array
-			output.Active[currentRow.board] = currentPlayer;
+			output.Active[currentRow.board - 1] = currentPlayer;
 		}
+
+		//can remove this later, simply used for initial run
+		//for(let i = 0; i < activeList.length; i++)
+		//	output.Active[i].storedWins = convertStoredWinsArrayToObject(activeList[i].storedWins, output.Active);
 
 		return output;
 	}
 
-	//TODO make function
-	export function setClub(club: IClubObject, write?: boolean)
+	/**
+	 * sets the entire club data based on a club object
+	 * @param club The inputed club object
+	 * @param write optional, must be set to true in order to write anything to the spreadsheet, may otherwise be used for testing purposes
+	 * @returns The output data that would be writen to Master and Active sheets, can be used for debugging and testing.
+	 */
+	export function setClub(club: IClub, write?: boolean)
 	{
-		//WHAT DO I EVEN DO????
+		let output: { Master: any[][], Active: any[][] } = { Master: null, Active: null };
+		output.Master = writeMasterListData(club.Master, write);
+		output.Active = writeActivePlayerData(club.Active, write);
+		return output;
 	}
 
 	/**
@@ -139,6 +104,43 @@ namespace FrontEnd
 				output[club[i].name] = input[i];
 		}
 		return output;
+	}
+
+	function convertIPlayerToEntryInMasterList(input: IPlayer): IEntryInMasterList
+	{
+		return {
+			row: Math.random(),	//why not?
+			name: input.name,
+			grade: input.grade,
+			group: input.group,
+			gamesPlayed: input.gamesPlayed,
+			storedWins: Benji.deepClone(input.storedWins),
+			glickoRating: input.glicko.rating,
+			glickoDeviation: input.glicko.deviation,
+			glickoVariance: input.glicko.variance,
+			lampertRating: input.lampert.rating
+		};
+	}
+
+	function convertIEntryInMasterListToIPlayer(input: IEntryInMasterList): IPlayer
+	{
+		return {
+			name: input.name,
+			boardNumber: null,
+			grade: input.grade,
+			group: input.group,
+			gamesPlayed: input.gamesPlayed,
+			storedWins: Benji.deepClone(input.storedWins),
+			isActive: false,
+			glicko: {
+				rating: input.glickoRating,
+				deviation: input.glickoDeviation,
+				variance: input.glickoVariance
+			},
+			lampert: { rating: input.lampertRating },
+			absent: null,
+			points: null
+		};
 	}
 
 	/** Describes a single row in the master list. */
@@ -181,83 +183,100 @@ namespace FrontEnd
 	/** What a master list object looks like */
 	interface IMasterListObject { [name: string]: IEntryInMasterList }
 
-	///**
-	// * Rewrites the entire master sheet
-	// * @param masterListData An IMasterListObject, this is what the master list will be set as
-	// * @param write Can be left blank or false for testing where changes are not desired
-	// * @returns Can be used for testing, generally to be treated as a void function
-	// */
-	//function writeMasterListData(masterListData: IMasterListObject, write?: boolean)
-	//{
-	//	//Without the Set class, using an object as a set seems sufficent
+	/**
+	 * Rewrites the entire master sheet
+	 * @param clubData An IMasterListObject, this is what the master list will be set as
+	 * @param write Can be left blank or false for testing where changes are not desired
+	 * @returns Can be used for testing, generally to be treated as a void function
+	 */
+	function writeMasterListData(clubData: { [name: string]: IPlayer }, write?: boolean)
+	{
+		//Without the Set class, using an object as a set seems sufficent
 
-	//	//maps old name to new name
-	//	let oldToNew_NameMap: { [name: string]: string } = {};
-	//	//maps new name to old name
-	//	let newToOld_NameMap: { [name: string]: string } = {};
+		//maps old name to new name
+		let oldToNew_NameMap: { [name: string]: string } = {};
+		//maps new name to old name
+		let newToOld_NameMap: { [name: string]: string } = {};
 
-	//	//first set up name map
-	//	for(let initialName in masterListData)
-	//	{
-	//		if(initialName !== masterListData[initialName].name)
-	//		{
-	//			//checks to see if the name is already a new name
-	//			if(newToOld_NameMap.hasOwnProperty(masterListData[initialName].name))
-	//			{
-	//				throw new Error(`The name ${masterListData[initialName].name} is being given twice. Can not write master list with duplicate names!`);
-	//			}
-
-
-	//			oldToNew_NameMap[initialName] = masterListData[initialName].name;
-	//			newToOld_NameMap[masterListData[initialName].name] = initialName;
-	//		}
-	//	}
-
-	//	//now check for any new name conflicts with old names
-	//	for(let newName in newToOld_NameMap)
-	//	{
-	//		if(masterListData.hasOwnProperty(newName) && !oldToNew_NameMap.hasOwnProperty(newName))
-	//		{
-	//			throw new Error(`The name ${newName} already exists in master list. Can not write master list with duplicate names!`);
-	//		}
-	//	}
+		//first set up name map
+		for(let initialName in clubData)
+		{
+			if(initialName !== clubData[initialName].name)
+			{
+				//checks to see if the name is already a new name
+				if(newToOld_NameMap.hasOwnProperty(clubData[initialName].name))
+				{
+					throw new Error(`The name ${clubData[initialName].name} is being given twice. Can not write master list with duplicate names!`);
+				}
 
 
-	//	//everything seems okay, lets create output object
-	//	let output: any[][] = [];
-	//	for(let initialName in masterListData)
-	//	{
-	//		let readRow = masterListData[initialName];
-	//		let writeRow = [];
-	//		writeRow[CONST.pages.master.columns.gamesPlayed] = readRow.gamesPlayed;
-	//		writeRow[CONST.pages.master.columns.grade] = readRow.grade;
-	//		writeRow[CONST.pages.master.columns.group] = readRow.group;
-	//		writeRow[CONST.pages.master.columns.lampertRating] = readRow.lampertRating;
-	//		writeRow[CONST.pages.master.columns.name] = readRow.name;
-	//		writeRow[CONST.pages.master.columns.glickoRating] = readRow.glickoRating;
-	//		writeRow[CONST.pages.master.columns.glickoRatingDeviation] = readRow.glickoDeviation;
-	//		writeRow[CONST.pages.master.columns.glickoRatingVariance] = readRow.glickoVariance;
+				oldToNew_NameMap[initialName] = clubData[initialName].name;
+				newToOld_NameMap[clubData[initialName].name] = initialName;
+			}
+		}
 
-	//		let winsArray: string[] = [];
-	//		for(let opponentName in readRow.storedWins)
-	//		{
-	//			let winName = newToOld_NameMap.hasOwnProperty(opponentName) ? newToOld_NameMap[opponentName] : opponentName;
-	//			let winCount = readRow.storedWins[opponentName];
-	//			winsArray.push(winName + ' ' + winCount);
-	//		}
+		//now check for any new name conflicts with old names
+		for(let newName in newToOld_NameMap)
+		{
+			if(clubData.hasOwnProperty(newName) && !oldToNew_NameMap.hasOwnProperty(newName))
+			{
+				throw new Error(`The name ${newName} already exists in master list. Can not write master list with duplicate names!`);
+			}
+		}
 
-	//		writeRow[CONST.pages.master.columns.storedWins] = winsArray.join(CONST.pages.master.storedWinSeperator);
-	//		output.push(writeRow);
-	//	}
+		//everything seems okay, lets create output object
+		let output: any[][] = [];
+		for(let initialName in clubData)
+		{
+			let readRow = clubData[initialName];
 
-	//	if(write)
-	//	{
-	//		let sheet = SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name);
-	//		sheet.getDataRange().offset(1, 0).clearContent();
-	//		sheet.getRange(2, 1, output.length, output[0].length).setValues(output);
-	//	}
-	//	return output;
-	//}
+			//TODO move this functionality elsewhere
+			//rectify the stored wins object, this will be done such that it affects the input, should maybe make this clearer, but works for now!
+			let storedWins: { [name: string]: number } = {};
+			for(let opponentName in readRow.storedWins)
+			{
+				let value = readRow.storedWins[opponentName];
+				if(value > 2)
+					value = 2;
+
+				if(oldToNew_NameMap.hasOwnProperty(opponentName))
+					storedWins[oldToNew_NameMap[opponentName]] = value;
+				else
+					storedWins[opponentName] = value;
+			}
+			readRow.storedWins = storedWins;
+
+
+			let writeRow = [];
+			writeRow[CONST.pages.master.columns.gamesPlayed] = readRow.gamesPlayed;
+			writeRow[CONST.pages.master.columns.grade] = readRow.grade;
+			writeRow[CONST.pages.master.columns.group] = readRow.group;
+			writeRow[CONST.pages.master.columns.lampertRating] = readRow.lampert.rating;
+			writeRow[CONST.pages.master.columns.name] = readRow.name;
+			writeRow[CONST.pages.master.columns.glickoRating] = readRow.glicko.rating;
+			writeRow[CONST.pages.master.columns.glickoRatingDeviation] = readRow.glicko.deviation;
+			writeRow[CONST.pages.master.columns.glickoRatingVariance] = readRow.glicko.variance;
+
+			let winsArray: string[] = [];
+			for(let opponentName in storedWins)
+			{
+				let winName = opponentName;
+				let winCount = storedWins[opponentName];
+				winsArray.push(winName + ' ' + winCount);
+			}
+
+			writeRow[CONST.pages.master.columns.storedWins] = winsArray.join(CONST.pages.master.storedWinSeperator);
+			output.push(writeRow);
+		}
+
+		if(write)
+		{
+			let sheet = SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name);
+			sheet.getDataRange().offset(1, 0).clearContent();
+			sheet.getRange(2, 1, output.length, output[0].length).setValues(output);
+		}
+		return output;
+	}
 
 	/**
 	 * Gets all the data stored in the master list as a single object
@@ -372,6 +391,15 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		timestamp: number;
 	}
 
+	/** Resets the games played page */
+	export function resetGamesPlayedPage()
+	{
+		let spreadsheet = SpreadsheetApp.getActive();
+		let sheet = spreadsheet.getSheetByName(CONST.pages.games.name);
+		let range = sheet.getDataRange();
+		range.offset(1, 1, range.getLastRow() - 1, range.getLastColumn() - 1).clearContent();
+	}
+
 	/**
 	 * Gets all the data stored in the games list as a single array
 	 * 
@@ -394,22 +422,73 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		return output;
 	}
 
+
 	/**
 	 * Returns array of all players who were signed in
 	 * 
 	 * @returns array of players signed in
 	 */
-	export function getAttendanceSheetData(): string[]
+	export function getAttendanceSheetData(): { [name: string]: boolean }
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.attendance.name).getDataRange().getValues();
-		let output: string[] = [];
+		let output: { [name: string]: boolean } = {};
 		for(let i = 1; i < data.length; i++)
 		{
 			let currentRow = data[i];
-			if(currentRow[CONST.pages.attendance.columns.attend])
-				output.push(currentRow[CONST.pages.attendance.columns.name]);
+			output[currentRow[CONST.pages.attendance.columns.name]] = currentRow[CONST.pages.attendance.columns.attend];
 		}
 		return output;
+	}
+
+	/**
+	 * Resets the attendance page
+	 * @param activePlayers Active part of chess club
+	 */
+	export function resetAttendancePage(activePlayers: IPlayer[])
+	{
+		let s = SpreadsheetApp.getActive();
+		let sheet = TemplateSheets.generatePageFromTemplate(s, s.getSheetByName(CONST.pages.attendance.template), activePlayers.length, CONST.pages.attendance.name);
+		let output: any[][] = [];
+		for(let i = 0; i < activePlayers.length; i++)
+			output.push([activePlayers[i].name]);
+		sheet.getRange(2, CONST.pages.attendance.columns.name + 1, output.length).setValues(output);
+		sheet.autoResizeColumns(1, sheet.getLastColumn());
+	}
+
+	/**
+	 * Remakes the attendance page without loss
+	 * @param activePlayers The active part of the chess club
+	 */
+	export function updateAttendanceSheet(activePlayers: IPlayer[])
+	{
+		let s = SpreadsheetApp.getActive();
+		let sheet = s.getSheetByName(CONST.pages.attendance.name);
+		let savedAttenance = sheet.getRange(2, CONST.pages.attendance.columns.attend + 1, sheet.getLastRow() - 1).getValues();
+		sheet = TemplateSheets.generatePageFromTemplate(s, s.getSheetByName(CONST.pages.attendance.template), activePlayers.length, CONST.pages.attendance.name);
+		let output: any[][] = [];
+		for(let i = 0; i < activePlayers.length; i++)
+		{
+			let currentRow = [];
+			currentRow[CONST.pages.attendance.columns.attend] = (savedAttenance[i] ? savedAttenance[i][0] : false)
+			currentRow[CONST.pages.attendance.columns.name] = activePlayers[i].name;
+			output.push(currentRow);
+		}
+		sheet.getRange(2, 1, output.length, output[0].length).setValues(output);
+		sheet.autoResizeColumns(1, sheet.getLastColumn());
+	}
+
+	function convertIPlayerToIActivePlayerData(input: IPlayer, club: { [name: string]: IPlayer }): IActivePlayerData
+	{
+		return {
+			name: input.name,
+			board: input.boardNumber,
+			storedWins: convertStoredWinsObjectToArray(input.storedWins, club),
+			absent: input.absent,
+			grade: input.grade,
+			group: input.group,
+			lampertRating: input.lampert.rating,
+			points: input.points
+		};
 	}
 
 	/** All data held on master sheet about an active player */
@@ -431,6 +510,66 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		points: number;
 		/** Did they miss last session? */
 		absent: boolean;
+	}
+
+	/**
+	 * Writes all data about the active club to the active page
+	 * @param club The active portion of the club in order of board number
+	 * @param write Should data be written? set to ture for release, usefull to set to false for debugging
+	 */
+	function writeActivePlayerData(club: IPlayer[], write?: boolean): any[][]
+	{
+		//check for no duplicates and make sure board number matches
+		let nameToIndexMap: { [name: string]: number } = {};
+		for(let i = 0; i < club.length; i++)
+		{
+			if(nameToIndexMap.hasOwnProperty(club[i].name))
+				throw new Error(`${club[i].name} is duplicate in club object on both boards ${nameToIndexMap[club[i].name]} and ${club[i].boardNumber}.
+JSON:
+${JSON.stringify(club)}`);
+			if(i + 1 !== club[i].boardNumber)
+				throw new Error(`${club[i].name} has a board-index mismatch, Index should be one less than board number.
+Board: ${club[i].boardNumber}
+Index: ${i}`);
+			nameToIndexMap[club[i].name] = i;
+		}
+
+		//setup output object
+		let output: any[][] = [];
+		for(let i = 0; i < club.length; i++)
+		{
+			let row = [];
+			for(let j = 0; j < CONST.pages.active.columns.wins + club.length; j++)
+				row.push('');
+			row[CONST.pages.active.columns.board] = i + 1;
+			row[CONST.pages.active.columns.missed] = club[i].absent;
+			row[CONST.pages.active.columns.name] = club[i].name;
+			row[CONST.pages.active.columns.points] = club[i].points;
+
+			//make stored wins table
+			//TODO add mirror image part
+			for(let name in club[i].storedWins)
+				if(nameToIndexMap[name] < i)
+					row[CONST.pages.active.columns.wins + nameToIndexMap[name]] = club[i].storedWins[name];
+			row[CONST.pages.active.columns.wins + i] = 'X';
+			output.push(row);
+		}
+
+		//now make page
+		let spreadsheet = SpreadsheetApp.getActive();
+		if(write)
+		{
+			let page = TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.active.template), club.length, CONST.pages.active.name);
+			let range = page.getRange(2, CONST.pages.active.columns.formulaStart, output.length, CONST.pages.active.columns.formulaCount);
+			let formulas = range.getFormulas();
+			page.getRange(2, 1, output.length, output[0].length).setValues(output);
+			page.setColumnWidths(CONST.pages.active.columns.wins + 1, club.length, CONST.pages.active.storedWinColumnSize);
+			page.autoResizeColumns(1, CONST.pages.active.columns.wins);
+			page.getDataRange().setFontSize(CONST.MommyFontSize)
+			range.setFormulas(formulas);
+		}
+
+		return output;
 	}
 
 	/** gets all data from the active players page */
@@ -466,6 +605,8 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		grade: string | number;
 		/** group */
 		group: string;
+		/** New name */
+		newName: string;
 	}
 
 	/** Gets all data from new player sheet and returns it as an array */
@@ -473,15 +614,23 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.newPlayers.name).getDataRange().getValues();
 		let output: INewPlayerData[] = [];
-		for(let i = 0; i < data.length && data[i][CONST.pages.newPlayers.columns.name]; i++)
+		for(let i = 1; i < data.length && data[i][CONST.pages.newPlayers.columns.name]; i++)
 		{
 			let currentRow = data[i];
 			output.push({
 				name: currentRow[CONST.pages.newPlayers.columns.name],
 				grade: currentRow[CONST.pages.newPlayers.columns.grade],
-				group: currentRow[CONST.pages.newPlayers.columns.group]
+				group: currentRow[CONST.pages.newPlayers.columns.group],
+				newName: currentRow[CONST.pages.newPlayers.columns.newName]
 			});
 		}
 		return output;
+	}
+
+	/** Resents teh new update player page */
+	export function resentNewPlayerPage()
+	{
+		let spreadsheet = SpreadsheetApp.getActive();
+		TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.newPlayers.template), CONST.pages.newPlayers.defaultRows, CONST.pages.newPlayers.name);
 	}
 }

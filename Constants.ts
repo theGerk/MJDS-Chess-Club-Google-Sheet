@@ -5,6 +5,7 @@
 
 
 const CONST = {
+	MommyFontSize: 14,
 	pages: {
 		master: {
 			name: 'Master Sheet',
@@ -22,6 +23,7 @@ const CONST = {
 			},
 		},
 		active: {
+			template: 'PrintPage-template',
 			name: 'Print Page',
 			columns: {
 				board: 0,
@@ -32,7 +34,10 @@ const CONST = {
 				points: 5,
 				missed: 6,
 				wins: 7,
+				formulaStart: 3,
+				formulaCount: 3,
 			},
+			storedWinColumnSize: 19,
 		},
 		games: {
 			name: 'Games Played',
@@ -65,6 +70,7 @@ const CONST = {
 				name: 0,
 				group: 1,
 				grade: 2,
+				newName: 3,
 			},
 			name: 'Update Players',
 			defaultRows: 20,
@@ -77,10 +83,42 @@ const CONST = {
 		'A': 'A',
 	},
 	ratings: {
-		lampert: {
-			ratio: .1,
-			minimumGainOnWin: 1,
-			maximumGainOnWin: 100,
-		},
 	},
 };
+
+/** Represents the most general player */
+interface IPlayer
+{
+	/** Player name [Unique] */
+	name: string;
+	/** Board number, null if inactive (part of active player data) */
+	boardNumber: number;
+	/** grade */
+	grade: string | number;
+	/** group */
+	group: string;
+	/** number of games played so far */
+	gamesPlayed: number;
+	/** Stored wins, as they may be found from the master list as a map */
+	storedWins: { [name: string]: number };
+	/** is the player active? */
+	isActive: boolean;
+	/** An object for the player's glicko rating */
+	glicko: Glicko.IRating;
+	/** An object for the player's Lampert rating */
+	lampert: Lampert.IRating;
+	/** Was the player abset last week (part of active player data) */
+	absent: boolean;
+	/** Points the player has */
+	points: number;
+}
+
+
+/** A single object representing the entire club. Members of and Active should both refrence the same object, they should not be copies. */
+interface IClub
+{
+	/** A map from names to player */
+	Master: { [name: string]: IPlayer };
+	/** An array of active players in board number order */
+	Active: IPlayer[];
+}

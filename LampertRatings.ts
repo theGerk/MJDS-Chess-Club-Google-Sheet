@@ -6,6 +6,7 @@ namespace Lampert
 	const RATIO = .1;
 	const MAXIMUM_SWING = 100;
 	const MINIMUM_SWING = 1;
+	export const INITIAL_RATING = 1000;
 
 	/** A lampert rating */
 	export interface IRating
@@ -73,6 +74,16 @@ namespace Lampert
 
 			default:
 				throw new Error(`A result of ${result} should never happen, only .5, 1 and 0 should be allowed`);
+		}
+	}
+
+
+	export function doRatingPeriod(ratingMap: (key: any) => IRating, games: { white: any, black: any, result: number }[])
+	{
+		for(let i = 0; i < games.length; i++)
+		{
+			let game = games[i];
+			match(ratingMap(game.white), ratingMap(game.black), game.result);
 		}
 	}
 }
