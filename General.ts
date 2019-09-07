@@ -1,7 +1,10 @@
 /// <reference path="Constants.ts"/>
 
 
-function masterListTo()
+namespace Benji
 {
-
+	export function deepClone(input)
+	{
+		return JSON.parse(JSON.stringify(input));
+	}
 }

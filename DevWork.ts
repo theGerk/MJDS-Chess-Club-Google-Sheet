@@ -83,7 +83,7 @@ function testRatings()
 		sum += data[name].rating;
 		count++;
 	}
-	let output: any[][] = [['name', 'computer'];
+	let output: any[][] = [['name', 'computer']];
 	for(let name in data)
 	{
 		output.push([name, data[name].rating]);

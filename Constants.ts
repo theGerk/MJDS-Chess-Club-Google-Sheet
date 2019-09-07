@@ -22,6 +22,7 @@ const CONST = {
 			},
 		},
 		active: {
+			template: 'PrintPage-template',
 			name: 'Print Page',
 			columns: {
 				board: 0,
@@ -33,6 +34,7 @@ const CONST = {
 				missed: 6,
 				wins: 7,
 			},
+			storedWinColumnSize: 19,
 		},
 		games: {
 			name: 'Games Played',

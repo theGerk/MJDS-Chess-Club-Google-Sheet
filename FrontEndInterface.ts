@@ -26,11 +26,13 @@ namespace FrontEnd
 		lampert: Lampert.IRating;
 		/** Was the player abset last week (part of active player data) */
 		absent: boolean;
+		/** Points the player has */
+		points: number;
 	}
 
 
 	/** A single object representing the entire club. Members of and Active should both refrence the same object, they should not be copies. */
-	export interface IClubObject
+	export interface IClub
 	{
 		/** A map from names to player */
 		Master: { [name: string]: IPlayer };
@@ -38,11 +40,14 @@ namespace FrontEnd
 		Active: IPlayer[];
 	}
 
-	/** Gets all of the players in the club as a nice object */
-	export function getClub(): IClubObject
+	/** 
+	 *  Gets all of the players in the club as a nice object
+	 *  @returns the entire club as an object
+	 */
+	export function getClub(): IClub
 	{
 		let masterList = getMasterListData();
-		let output: IClubObject = {
+		let output: IClub = {
 			Master: {},
 			Active: []
 		};
@@ -50,23 +55,7 @@ namespace FrontEnd
 		//first generate object from master list assuming everyone is not in the club
 		for(let name in masterList)
 		{
-			let currentRow = masterList[name];
-			output.Master[name] = {
-				name: currentRow.name,
-				boardNumber: null,
-				grade: currentRow.grade,
-				group: currentRow.group,
-				gamesPlayed: currentRow.gamesPlayed,
-				storedWins: currentRow.storedWins,
-				isActive: false,
-				glicko: {
-					rating: currentRow.glickoRating,
-					deviation: currentRow.glickoDeviation,
-					variance: currentRow.glickoVariance
-				},
-				lampert: { rating: currentRow.lampertRating },
-				absent: null
-			}
+			output.Master[name] = convertIEntryInMasterListToIPlayer(masterList[name]);
 		}
 
 		//now add in data for active players
@@ -90,6 +79,7 @@ namespace FrontEnd
 			currentPlayer.boardNumber = currentRow.board;
 			currentPlayer.isActive = true;
 			currentPlayer.absent = currentRow.absent;
+			currentPlayer.points = currentPlayer.points;
 
 			//add to the active array
 			output.Active[currentRow.board] = currentPlayer;
@@ -98,10 +88,21 @@ namespace FrontEnd
 		return output;
 	}
 
-	//TODO make function
-	export function setClub(club: IClubObject)
+	/**
+	 * sets the entire club data based on a club object
+	 * @param club The inputed club object
+	 * @param write optional, must be set to true in order to write anything to the spreadsheet, may otherwise be used for testing purposes
+	 * @returns The output data that would be writen to Master and Active sheets, can be used for debugging and testing.
+	 */
+	export function setClub(club: IClub, write?: boolean)
 	{
-
+		let masterList: IMasterListObject = {};
+		let output: { Master: any[][], Active: any[][] } = { Master: null, Active: null };
+		for(let name in club.Master)
+			masterList[name] = convertIPlayerToEntryInMasterList(club.Master[name]);
+		output.Master = writeMasterListData(masterList, write);
+		output.Active = writeActivePlayerData(club.Active, write);
+		return output;
 	}
 
 	/**
@@ -139,6 +140,43 @@ namespace FrontEnd
 				output[club[i].name] = input[i];
 		}
 		return output;
+	}
+
+	function convertIPlayerToEntryInMasterList(input: IPlayer): IEntryInMasterList
+	{
+		return {
+			row: Math.random(),	//why not?
+			name: input.name,
+			grade: input.grade,
+			group: input.group,
+			gamesPlayed: input.gamesPlayed,
+			storedWins: Benji.deepClone(input.storedWins),
+			glickoRating: input.glicko.rating,
+			glickoDeviation: input.glicko.deviation,
+			glickoVariance: input.glicko.variance,
+			lampertRating: input.lampert.rating
+		};
+	}
+
+	function convertIEntryInMasterListToIPlayer(input: IEntryInMasterList): IPlayer
+	{
+		return {
+			name: input.name,
+			boardNumber: null,
+			grade: input.grade,
+			group: input.group,
+			gamesPlayed: input.gamesPlayed,
+			storedWins: Benji.deepClone(input.storedWins),
+			isActive: false,
+			glicko: {
+				rating: input.glickoRating,
+				deviation: input.glickoDeviation,
+				variance: input.glickoVariance
+			},
+			lampert: { rating: input.lampertRating },
+			absent: null,
+			points: null
+		};
 	}
 
 	/** Describes a single row in the master list. */
@@ -412,6 +450,20 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		return output;
 	}
 
+	function convertIPlayerToIActivePlayerData(input: IPlayer, club: { [name: string]: IPlayer }): IActivePlayerData
+	{
+		return {
+			name: input.name,
+			board: input.boardNumber,
+			storedWins: convertStoredWinsObjectToArray(input.storedWins, club),
+			absent: input.absent,
+			grade: input.grade,
+			group: input.group,
+			lampertRating: input.lampert.rating,
+			points: input.points
+		};
+	}
+
 	/** All data held on master sheet about an active player */
 	export interface IActivePlayerData
 	{
@@ -431,6 +483,61 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		points: number;
 		/** Did they miss last session? */
 		absent: boolean;
+	}
+
+	/**
+	 * Writes all data about the active club to the active page
+	 * @param club The active portion of the club in order of board number
+	 * @param write Should data be written? set to ture for release, usefull to set to false for debugging
+	 */
+	function writeActivePlayerData(club: IPlayer[], write?: boolean): any[][]
+	{
+		//check for no duplicates and make sure board number matches
+		let nameToIndexMap: { [name: string]: number }
+		for(let i = 0; i < club.length; i++)
+		{
+			if(nameToIndexMap.hasOwnProperty(club[i].name))
+				throw new Error(`${club[i].name} is duplicate in club object on both boards ${nameToIndexMap[club[i].name]} and ${club[i].boardNumber}.
+JSON:
+${JSON.stringify(club)}`);
+			if(i + 1 !== club[i].boardNumber)
+				throw new Error(`${club[i].name} has a board-index mismatch, Index should be one less than board number.
+Board: ${club[i].boardNumber}
+Index: ${i}`);
+			nameToIndexMap[club[i].name] = i;
+		}
+
+		//setup output object
+		let output: any[][] = [];
+		for(let i = 0; i < club.length; i++)
+		{
+			let row = [];
+			row.length = CONST.pages.active.columns.wins + club.length - 1;
+			row[CONST.pages.active.columns.missed] = club[i].absent;
+			row[CONST.pages.active.columns.name] = club[i].name;
+			row[CONST.pages.active.columns.points] = club[i].points;
+
+			//make stored wins table
+			//TODO add mirror image part
+			for(var j = 0; j < club[i].storedWins.length && j < i; j++)
+			{
+				row[CONST.pages.active.columns.wins + j] = club[i].storedWins[j];
+			}
+			row[CONST.pages.active.columns.wins + j] = 'X';
+		}
+
+
+		//now make page
+		let spreadsheet = SpreadsheetApp.getActive();
+		if(write)
+		{
+			let page = TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.active.template), club.length, CONST.pages.active.name);
+			page.getRange(2, 1, output.length, output[0].length).setValues(output);
+			page.setColumnWidths(CONST.pages.active.columns.wins + 1, club.length, CONST.pages.active.storedWinColumnSize);
+			page.autoResizeColumns(1, CONST.pages.active.columns.wins);
+		}
+
+		return output;
 	}
 
 	/** gets all data from the active players page */
