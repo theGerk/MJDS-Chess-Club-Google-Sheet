@@ -69,6 +69,12 @@ namespace WeeklyUpdate
 	//TODO oh boy a biggy here, lets do it!
 	function consumeGamesPlayed(club: IClub, games: FrontEnd.IGamePlayed[])
 	{
+		//adjusts games played for each player
+		for(let i = 0; i < games.length; i++)
+		{
+			club.Master[games[i].white].gamesPlayed++;
+			club.Master[games[i].black].gamesPlayed++;
+		}
 
 		//Does all lampert rating changes
 		Lampert.doRatingPeriod((name: string) => club.Master[name].lampert, games);
