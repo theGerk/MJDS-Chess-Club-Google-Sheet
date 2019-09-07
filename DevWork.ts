@@ -93,5 +93,11 @@ function testRatings()
 
 function testFunction()
 {
-	testRatings();
+	redoAsIs(true);
+}
+
+function redoAsIs(write?: boolean)
+{
+	let club = FrontEnd.getClub();
+	FrontEnd.setClub(club, write);
 }

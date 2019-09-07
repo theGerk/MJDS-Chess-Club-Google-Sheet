@@ -82,8 +82,12 @@ namespace FrontEnd
 			currentPlayer.points = currentPlayer.points;
 
 			//add to the active array
-			output.Active[currentRow.board] = currentPlayer;
+			output.Active[currentRow.board - 1] = currentPlayer;
 		}
+
+		//can remove this later, simply used for initial run
+		//for(let i = 0; i < activeList.length; i++)
+		//	output.Active[i].storedWins = convertStoredWinsArrayToObject(activeList[i].storedWins, output.Active);
 
 		return output;
 	}
@@ -493,7 +497,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 	function writeActivePlayerData(club: IPlayer[], write?: boolean): any[][]
 	{
 		//check for no duplicates and make sure board number matches
-		let nameToIndexMap: { [name: string]: number }
+		let nameToIndexMap: { [name: string]: number } = {};
 		for(let i = 0; i < club.length; i++)
 		{
 			if(nameToIndexMap.hasOwnProperty(club[i].name))
@@ -512,29 +516,34 @@ Index: ${i}`);
 		for(let i = 0; i < club.length; i++)
 		{
 			let row = [];
-			row.length = CONST.pages.active.columns.wins + club.length - 1;
+			for(let j = 0; j < CONST.pages.active.columns.wins + club.length; j++)
+				row.push('');
+			row[CONST.pages.active.columns.board] = i + 1;
 			row[CONST.pages.active.columns.missed] = club[i].absent;
 			row[CONST.pages.active.columns.name] = club[i].name;
 			row[CONST.pages.active.columns.points] = club[i].points;
 
 			//make stored wins table
 			//TODO add mirror image part
-			for(var j = 0; j < club[i].storedWins.length && j < i; j++)
-			{
-				row[CONST.pages.active.columns.wins + j] = club[i].storedWins[j];
-			}
-			row[CONST.pages.active.columns.wins + j] = 'X';
+			for(let name in club[i].storedWins)
+				if(nameToIndexMap[name] < i)
+					row[CONST.pages.active.columns.wins + nameToIndexMap[name]] = club[i].storedWins[name];
+			row[CONST.pages.active.columns.wins + i] = 'X';
+			output.push(row);
 		}
-
 
 		//now make page
 		let spreadsheet = SpreadsheetApp.getActive();
 		if(write)
 		{
 			let page = TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.active.template), club.length, CONST.pages.active.name);
+			let range = page.getRange(2, CONST.pages.active.columns.formulaStart, output.length, CONST.pages.active.columns.formulaCount);
+			let formulas = range.getFormulas();
 			page.getRange(2, 1, output.length, output[0].length).setValues(output);
 			page.setColumnWidths(CONST.pages.active.columns.wins + 1, club.length, CONST.pages.active.storedWinColumnSize);
 			page.autoResizeColumns(1, CONST.pages.active.columns.wins);
+			page.getDataRange().setFontSize(CONST.MommyFontSize)
+			range.setFormulas(formulas);
 		}
 
 		return output;

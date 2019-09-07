@@ -5,6 +5,7 @@
 
 
 const CONST = {
+	MommyFontSize: 14,
 	pages: {
 		master: {
 			name: 'Master Sheet',
@@ -33,6 +34,8 @@ const CONST = {
 				points: 5,
 				missed: 6,
 				wins: 7,
+				formulaStart: 3,
+				formulaCount: 3,
 			},
 			storedWinColumnSize: 19,
 		},
