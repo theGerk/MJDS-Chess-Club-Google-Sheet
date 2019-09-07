@@ -36,6 +36,7 @@ namespace TemplateSheets
 	 */
 	export function generatePageFromTemplate(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet, template: GoogleAppsScript.Spreadsheet.Sheet, rows: number, sheetName?: string, sheetIndex?: number)
 	{
+		//Logger.log(`${template.getName()} - ${rows} on ${sheetName}.`);
 		let sheet: GoogleAppsScript.Spreadsheet.Sheet;
 		if(sheetName)
 		{

@@ -54,14 +54,14 @@ function initialize(inputObj: { [str: string]: { grade: number | string, group: 
 
 function testRatings()
 {
-	let activeData = FrontEnd.getActivePlayerData();
+	let activeData = FrontEnd.getClub().Active;
 	let games = FrontEnd.getGamesPlayedData();
 
 	let data: { [name: string]: Lampert.IRating } = {};
 	for(let i = 0; i < activeData.length; i++)
 	{
 		let current = activeData[i];
-		data[current.name] = { rating: current.lampertRating };
+		data[current.name] = current.lampert;
 	}
 
 	let s = SpreadsheetApp.getActive();
@@ -93,7 +93,10 @@ function testRatings()
 
 function testFunction()
 {
-	redoAsIs(true);
+	let str = JSON.stringify(SpreadsheetApp.getActiveRange().getValues())
+	Logger.log(str);
+	SpreadsheetApp.getUi().alert(str);
+	throw str;
 }
 
 function redoAsIs(write?: boolean)
