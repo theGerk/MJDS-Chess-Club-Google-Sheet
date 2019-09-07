@@ -391,6 +391,15 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		timestamp: number;
 	}
 
+	/** Resets the games played page */
+	export function resetGamesPlayedPage()
+	{
+		let spreadsheet = SpreadsheetApp.getActive();
+		let sheet = spreadsheet.getSheetByName(CONST.pages.games.name);
+		let range = sheet.getDataRange();
+		range.offset(1, 1, range.getLastRow() - 1, range.getLastColumn() - 1).clearContent();
+	}
+
 	/**
 	 * Gets all the data stored in the games list as a single array
 	 * 
@@ -413,6 +422,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		return output;
 	}
 
+
 	/**
 	 * Returns array of all players who were signed in
 	 * 
@@ -428,6 +438,21 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 			output[currentRow[CONST.pages.attendance.columns.name]] = currentRow[CONST.pages.attendance.columns.attend];
 		}
 		return output;
+	}
+
+	/**
+	 * Resets the attendance page
+	 * @param activePlayers Active part of chess club
+	 */
+	export function resetAttendancePage(activePlayers: IPlayer[])
+	{
+		let s = SpreadsheetApp.getActive();
+		let sheet = TemplateSheets.generatePageFromTemplate(s, s.getSheetByName(CONST.pages.attendance.template), activePlayers.length, CONST.pages.attendance.name);
+		let output: any[][] = [];
+		for(let i = 0; i < activePlayers.length; i++)
+			output.push([activePlayers[i].name]);
+		sheet.getRange(2, CONST.pages.attendance.columns.name + 1, output.length).setValues(output);
+		sheet.autoResizeColumns(1, sheet.getLastColumn());
 	}
 
 	/**

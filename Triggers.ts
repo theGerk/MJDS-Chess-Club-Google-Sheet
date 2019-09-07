@@ -37,16 +37,17 @@ namespace WeeklyUpdate
 		consumeGamesPlayed(club, gamesPlayed);
 
 		//do attendance modifications on the club
-		//TODO do attendance, both checing and uncecking attendance box and changing board number
+		for(let i = 0; i < club.Active.length; i++)
+			club.Active[i].absent = attendance.hasOwnProperty(club.Active[i].name);
 
 		if(write)
 		{
-			//TODO write these functions
-			//FrontEnd.resetAttendancePage();
-			//FrontEnd.resetGamesPlayedPage();
+			FrontEnd.resetAttendancePage(club.Active);
+			FrontEnd.resetGamesPlayedPage();
+			FrontEnd.setClub(club, write);
 		}
 
-		FrontEnd.setClub(club, write);
+		Logger.log(JSON.stringify(club));
 	}
 
 	/**
