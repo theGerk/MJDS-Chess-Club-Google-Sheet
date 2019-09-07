@@ -99,9 +99,9 @@ namespace FrontEnd
 	}
 
 	//TODO make function
-	export function setClub(club: IClubObject)
+	export function setClub(club: IClubObject, write?: boolean)
 	{
-
+		//WHAT DO I EVEN DO????
 	}
 
 	/**
@@ -142,7 +142,7 @@ namespace FrontEnd
 	}
 
 	/** Describes a single row in the master list. */
-	export interface IEntryInMasterList
+	interface IEntryInMasterList
 	{
 		/** The player's name (Unique ID). */
 		name: string;
@@ -179,92 +179,92 @@ namespace FrontEnd
 	}
 
 	/** What a master list object looks like */
-	export interface IMasterListObject { [name: string]: IEntryInMasterList }
+	interface IMasterListObject { [name: string]: IEntryInMasterList }
 
-	/**
-	 * Rewrites the entire master sheet
-	 * @param masterListData An IMasterListObject, this is what the master list will be set as
-	 * @param write Can be left blank or false for testing where changes are not desired
-	 * @returns Can be used for testing, generally to be treated as a void function
-	 */
-	function writeMasterListData(masterListData: IMasterListObject, write?: boolean)
-	{
-		//Without the Set class, using an object as a set seems sufficent
+	///**
+	// * Rewrites the entire master sheet
+	// * @param masterListData An IMasterListObject, this is what the master list will be set as
+	// * @param write Can be left blank or false for testing where changes are not desired
+	// * @returns Can be used for testing, generally to be treated as a void function
+	// */
+	//function writeMasterListData(masterListData: IMasterListObject, write?: boolean)
+	//{
+	//	//Without the Set class, using an object as a set seems sufficent
 
-		//maps old name to new name
-		let oldToNew_NameMap: { [name: string]: string } = {};
-		//maps new name to old name
-		let newToOld_NameMap: { [name: string]: string } = {};
+	//	//maps old name to new name
+	//	let oldToNew_NameMap: { [name: string]: string } = {};
+	//	//maps new name to old name
+	//	let newToOld_NameMap: { [name: string]: string } = {};
 
-		//first set up name map
-		for(let initialName in masterListData)
-		{
-			if(initialName !== masterListData[initialName].name)
-			{
-				//checks to see if the name is already a new name
-				if(newToOld_NameMap.hasOwnProperty(masterListData[initialName].name))
-				{
-					throw new Error(`The name ${masterListData[initialName].name} is being given twice. Can not write master list with duplicate names!`);
-				}
-
-
-				oldToNew_NameMap[initialName] = masterListData[initialName].name;
-				newToOld_NameMap[masterListData[initialName].name] = initialName;
-			}
-		}
-
-		//now check for any new name conflicts with old names
-		for(let newName in newToOld_NameMap)
-		{
-			if(masterListData.hasOwnProperty(newName) && !oldToNew_NameMap.hasOwnProperty(newName))
-			{
-				throw new Error(`The name ${newName} already exists in master list. Can not write master list with duplicate names!`);
-			}
-		}
+	//	//first set up name map
+	//	for(let initialName in masterListData)
+	//	{
+	//		if(initialName !== masterListData[initialName].name)
+	//		{
+	//			//checks to see if the name is already a new name
+	//			if(newToOld_NameMap.hasOwnProperty(masterListData[initialName].name))
+	//			{
+	//				throw new Error(`The name ${masterListData[initialName].name} is being given twice. Can not write master list with duplicate names!`);
+	//			}
 
 
-		//everything seems okay, lets create output object
-		let output: any[][] = [];
-		for(let initialName in masterListData)
-		{
-			let readRow = masterListData[initialName];
-			let writeRow = [];
-			writeRow[CONST.pages.master.columns.gamesPlayed] = readRow.gamesPlayed;
-			writeRow[CONST.pages.master.columns.grade] = readRow.grade;
-			writeRow[CONST.pages.master.columns.group] = readRow.group;
-			writeRow[CONST.pages.master.columns.lampertRating] = readRow.lampertRating;
-			writeRow[CONST.pages.master.columns.name] = readRow.name;
-			writeRow[CONST.pages.master.columns.glickoRating] = readRow.glickoRating;
-			writeRow[CONST.pages.master.columns.glickoRatingDeviation] = readRow.glickoDeviation;
-			writeRow[CONST.pages.master.columns.glickoRatingVariance] = readRow.glickoVariance;
+	//			oldToNew_NameMap[initialName] = masterListData[initialName].name;
+	//			newToOld_NameMap[masterListData[initialName].name] = initialName;
+	//		}
+	//	}
 
-			let winsArray: string[] = [];
-			for(let opponentName in readRow.storedWins)
-			{
-				let winName = newToOld_NameMap.hasOwnProperty(opponentName) ? newToOld_NameMap[opponentName] : opponentName;
-				let winCount = readRow.storedWins[opponentName];
-				winsArray.push(winName + ' ' + winCount);
-			}
+	//	//now check for any new name conflicts with old names
+	//	for(let newName in newToOld_NameMap)
+	//	{
+	//		if(masterListData.hasOwnProperty(newName) && !oldToNew_NameMap.hasOwnProperty(newName))
+	//		{
+	//			throw new Error(`The name ${newName} already exists in master list. Can not write master list with duplicate names!`);
+	//		}
+	//	}
 
-			writeRow[CONST.pages.master.columns.storedWins] = winsArray.join(CONST.pages.master.storedWinSeperator);
-			output.push(writeRow);
-		}
 
-		if(write)
-		{
-			let sheet = SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name);
-			sheet.getDataRange().offset(1, 0).clearContent();
-			sheet.getRange(2, 1, output.length, output[0].length).setValues(output);
-		}
-		return output;
-	}
+	//	//everything seems okay, lets create output object
+	//	let output: any[][] = [];
+	//	for(let initialName in masterListData)
+	//	{
+	//		let readRow = masterListData[initialName];
+	//		let writeRow = [];
+	//		writeRow[CONST.pages.master.columns.gamesPlayed] = readRow.gamesPlayed;
+	//		writeRow[CONST.pages.master.columns.grade] = readRow.grade;
+	//		writeRow[CONST.pages.master.columns.group] = readRow.group;
+	//		writeRow[CONST.pages.master.columns.lampertRating] = readRow.lampertRating;
+	//		writeRow[CONST.pages.master.columns.name] = readRow.name;
+	//		writeRow[CONST.pages.master.columns.glickoRating] = readRow.glickoRating;
+	//		writeRow[CONST.pages.master.columns.glickoRatingDeviation] = readRow.glickoDeviation;
+	//		writeRow[CONST.pages.master.columns.glickoRatingVariance] = readRow.glickoVariance;
+
+	//		let winsArray: string[] = [];
+	//		for(let opponentName in readRow.storedWins)
+	//		{
+	//			let winName = newToOld_NameMap.hasOwnProperty(opponentName) ? newToOld_NameMap[opponentName] : opponentName;
+	//			let winCount = readRow.storedWins[opponentName];
+	//			winsArray.push(winName + ' ' + winCount);
+	//		}
+
+	//		writeRow[CONST.pages.master.columns.storedWins] = winsArray.join(CONST.pages.master.storedWinSeperator);
+	//		output.push(writeRow);
+	//	}
+
+	//	if(write)
+	//	{
+	//		let sheet = SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name);
+	//		sheet.getDataRange().offset(1, 0).clearContent();
+	//		sheet.getRange(2, 1, output.length, output[0].length).setValues(output);
+	//	}
+	//	return output;
+	//}
 
 	/**
 	 * Gets all the data stored in the master list as a single object
 	 * 
 	 * @returns an object mapping names to their entry in the master list
 	 */
-	export function getMasterListData()
+	function getMasterListData()
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name).getDataRange().getValues();
 		let output: IMasterListObject = {};
@@ -434,7 +434,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 	}
 
 	/** gets all data from the active players page */
-	export function getActivePlayerData()
+	function getActivePlayerData()
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.active.name).getDataRange().getValues();
 		let output: IActivePlayerData[] = [];
