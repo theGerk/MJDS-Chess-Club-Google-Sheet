@@ -117,7 +117,7 @@ namespace FrontEnd
 			storedWins: Benji.deepClone(input.storedWins),
 			glickoRating: input.glicko.rating,
 			glickoDeviation: input.glicko.deviation,
-			glickoVariance: input.glicko.variance,
+			glickoVariance: input.glicko.volatility,
 			lampertRating: input.lampert.rating
 		};
 	}
@@ -135,7 +135,7 @@ namespace FrontEnd
 			glicko: {
 				rating: input.glickoRating,
 				deviation: input.glickoDeviation,
-				variance: input.glickoVariance
+				volatility: input.glickoVariance
 			},
 			lampert: { rating: input.lampertRating },
 			absent: null,
@@ -255,7 +255,7 @@ namespace FrontEnd
 			writeRow[CONST.pages.master.columns.name] = readRow.name;
 			writeRow[CONST.pages.master.columns.glickoRating] = readRow.glicko.rating;
 			writeRow[CONST.pages.master.columns.glickoRatingDeviation] = readRow.glicko.deviation;
-			writeRow[CONST.pages.master.columns.glickoRatingVariance] = readRow.glicko.variance;
+			writeRow[CONST.pages.master.columns.glickoRatingVariance] = readRow.glicko.volatility;
 
 			let winsArray: string[] = [];
 			for(let opponentName in storedWins)

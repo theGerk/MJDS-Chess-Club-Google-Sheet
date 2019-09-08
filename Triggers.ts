@@ -79,8 +79,11 @@ namespace WeeklyUpdate
 
 		//Does all lampert rating changes
 		Lampert.doRatingPeriod((name: string) => club.Master[name].lampert, games);
-		//TODO finish the glicko function
-		//Glicko.doRatingPeriod((name: string) => club.Master[name].glicko, games);
+		//Does all Glicko rating changes (using glicko 2 system)
+		let temp: Glicko.IRating[] = [];
+		for(let player in club.Master)
+			temp.push(club.Master[player].glicko);
+		Glicko.doRatingPeriod((name: string) => club.Master[name].glicko, games, temp);
 
 		//TODO do board changes (including removing inactive players)
 

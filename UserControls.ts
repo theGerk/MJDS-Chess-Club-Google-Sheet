@@ -43,8 +43,8 @@ function updatePlayers(): void
 				gamesPlayed: 0,
 				glicko: {
 					deviation: null,
-					rating: null,
-					variance: null
+					rating: Glicko.INITIAL_RATING,
+					volatility: null
 				},
 				grade: currentNewPlayer.grade,
 				group: currentNewPlayer.group,
