@@ -60,6 +60,18 @@ namespace Glicko
 		}
 	}
 
+	function convertFromGlicko2(everyone: IRating[])
+	{
+		for(let i = 0; i < everyone.length; i++)
+		{
+			if(israted(everyone[i]))
+			{
+				everyone[i].rating = everyone[i].rating * GLICKO_2_CONVERSTION_CONSTANT + INITIAL_RATING;
+				everyone[i].deviation *= GLICKO_2_CONVERSTION_CONSTANT;
+			}
+		}
+	}
+
 	/**
 	 * Makes an array of objects used in calculating the rating changes for each player. This is described at the end of step 2 in the glicko2.pdf
 	 * @param player Player whos opponents object we are making
@@ -130,6 +142,9 @@ namespace Glicko
 		for(let i = 0; i < everyone.length; i++)
 		{
 			let me = everyone[i];
+			if(!israted(me))
+				continue;
+
 			let opponentArray = opponentArrays[i];
 			//if the opponent does not compete during the rating period, described after step 8.
 			if(opponentArray.length === 0)
@@ -187,7 +202,47 @@ namespace Glicko
 			let f_a = f(A);
 			let f_b = f(B);
 
-			//TODO continue part 4.
+			//part 4:
+			while(Math.abs(B - A) > CONVERGENCE_TOLERANCE)
+			{
+				//a)
+				let C = A + (A - B) * f_a / (f_b - f_a);
+				let f_c = f(C);
+
+				//b)
+				if(f_c * f_b < 0)
+				{
+					A = B;
+					f_a = f_b;
+				}
+				else
+				{
+					f_a /= 2;
+				}
+
+				//c)
+				B = C;
+				f_b = f_c;
+			}
+
+			//part 5:
+			me.volatility = Math.exp(A / 2);
+
+
+			//Step 6: Update the rating deviation to the new pre-rating period value, $\phi^*$
+			let tempDeviation = Math.sqrt(me.deviation * me.deviation + me.volatility * me.volatility);
+
+
+			//Step 7: Update the rating and RD to the new values $\mu'$ and $\phi'$
+			me.deviation = 1 / Math.sqrt(1 / (tempDeviation * tempDeviation) + 1 / estimatedVariance);
+			let sum = 0;
+			for(let j = 0; j < opponentArray.length; j++)
+				sum += g(opponentArray[j].deviation) * (opponentArray[j].score - E(me.rating, opponentArray[j].rating, opponentArray[j].deviation));
+			me.rating += tempDeviation * tempDeviation * sum;
 		}
+
+
+		//Step 8: Convert back to original scale
+		convertFromGlicko2(everyone);
 	}
 }
