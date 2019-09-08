@@ -628,9 +628,18 @@ Index: ${i}`);
 	}
 
 	/** Resents teh new update player page */
-	export function resentNewPlayerPage()
+	export function resetNewPlayerPage()
 	{
 		let spreadsheet = SpreadsheetApp.getActive();
 		TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.newPlayers.template), CONST.pages.newPlayers.defaultRows, CONST.pages.newPlayers.name);
+	}
+
+	export function addGameLog(games: IGamePlayed[])
+	{
+		let spreadsheet = SpreadsheetApp.getActive();
+		let sheet = spreadsheet.getSheetByName(CONST.pages.gamesLog.name);
+		if(!sheet)
+			sheet = spreadsheet.insertSheet(CONST.pages.gamesLog.name);
+		sheet.getRange((sheet.getLastRow() || 0) + 1, CONST.pages.gamesLog.columns.data + 1).setValue(JSON.stringify(games));
 	}
 }

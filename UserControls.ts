@@ -61,5 +61,5 @@ function updatePlayers(): void
 	}
 	FrontEnd.setClub(club, true);
 	FrontEnd.updateAttendanceSheet(club.Active);
-	FrontEnd.resentNewPlayerPage();
+	FrontEnd.resetNewPlayerPage();
 }

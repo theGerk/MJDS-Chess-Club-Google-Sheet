@@ -7,6 +7,12 @@
 const CONST = {
 	MommyFontSize: 14,
 	pages: {
+		gamesLog: {
+			name: 'Game Log',
+			columns: {
+				data: 0,
+			},
+		},
 		master: {
 			name: 'Master Sheet',
 			storedWinSeperator: ', ',

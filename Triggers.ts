@@ -43,6 +43,7 @@ namespace WeeklyUpdate
 		if(write)
 		{
 			FrontEnd.resetAttendancePage(club.Active);
+			FrontEnd.addGameLog(gamesPlayed);
 			FrontEnd.resetGamesPlayedPage();
 			FrontEnd.setClub(club, write);
 		}
