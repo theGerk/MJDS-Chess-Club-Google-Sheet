@@ -627,7 +627,7 @@ Index: ${i}`);
 		return output;
 	}
 
-	/** Resents teh new update player page */
+	/** Resets the new update player page */
 	export function resetNewPlayerPage()
 	{
 		let spreadsheet = SpreadsheetApp.getActive();
