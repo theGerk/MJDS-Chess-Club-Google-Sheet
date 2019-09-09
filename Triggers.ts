@@ -18,7 +18,7 @@ function onOpen()
 
 function weeklyUpdate()
 {
-	WeeklyUpdate.doAll();
+	WeeklyUpdate.doAll(true);
 }
 
 namespace WeeklyUpdate
