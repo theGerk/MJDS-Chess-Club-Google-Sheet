@@ -42,7 +42,8 @@ namespace FrontEnd
 			currentPlayer.boardNumber = currentRow.board;
 			currentPlayer.isActive = true;
 			currentPlayer.absent = currentRow.absent;
-			currentPlayer.points = currentPlayer.points;
+			currentPlayer.points = currentRow.points;
+			currentPlayer.registered = currentRow.registered;
 
 			//add to the active array
 			output.Active[currentRow.board - 1] = currentPlayer;
@@ -139,7 +140,8 @@ namespace FrontEnd
 			},
 			lampert: { rating: input.lampertRating },
 			absent: null,
-			points: null
+			points: null,
+			registered: null
 		};
 	}
 
@@ -487,7 +489,8 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 			grade: input.grade,
 			group: input.group,
 			lampertRating: input.lampert.rating,
-			points: input.points
+			points: input.points,
+			registered: input.registered,
 		};
 	}
 
@@ -510,6 +513,8 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		points: number;
 		/** Did they miss last session? */
 		absent: boolean;
+		/** Are the regiestered? */
+		registered: boolean;
 	}
 
 	/**
@@ -536,6 +541,7 @@ Index: ${i}`);
 
 		//setup output object
 		let output: any[][] = [];
+		let backgrounds: string[][] = [];
 		for(let i = 0; i < club.length; i++)
 		{
 			let row = [];
@@ -553,6 +559,8 @@ Index: ${i}`);
 					row[CONST.pages.active.columns.wins + nameToIndexMap[name]] = club[i].storedWins[name];
 			row[CONST.pages.active.columns.wins + i] = 'X';
 			output.push(row);
+
+			backgrounds.push([club[i].registered ? CONST.pages.active.regcolors.registered : CONST.pages.active.regcolors.unregistered])
 		}
 
 		//now make page
@@ -565,8 +573,11 @@ Index: ${i}`);
 			page.getRange(2, 1, output.length, output[0].length).setValues(output);
 			page.setColumnWidths(CONST.pages.active.columns.wins + 1, club.length, CONST.pages.active.storedWinColumnSize);
 			page.autoResizeColumns(1, CONST.pages.active.columns.wins);
-			page.getDataRange().setFontSize(CONST.MommyFontSize)
+			page.getDataRange().setFontSize(CONST.RobinFontSize)
 			range.setFormulas(formulas);
+
+			//Set background color for names to determine registered or not.
+			page.getRange(2, CONST.pages.active.columns.name + 1, backgrounds.length).setBackgrounds(backgrounds);
 		}
 
 		return output;
@@ -575,7 +586,9 @@ Index: ${i}`);
 	/** gets all data from the active players page */
 	function getActivePlayerData()
 	{
-		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.active.name).getDataRange().getValues();
+		let range = SpreadsheetApp.getActive().getSheetByName(CONST.pages.active.name).getDataRange();
+		let data = range.getValues();
+		let backgrounds = range.getBackgrounds();
 		let output: IActivePlayerData[] = [];
 		for(let i = 1; i < data.length; i++)
 		{
@@ -590,7 +603,8 @@ Index: ${i}`);
 				grade: currentRow[CONST.pages.active.columns.grade],
 				group: currentRow[CONST.pages.active.columns.group],
 				points: currentRow[CONST.pages.active.columns.points],
-				absent: currentRow[CONST.pages.active.columns.missed]
+				absent: currentRow[CONST.pages.active.columns.missed],
+				registered: backgrounds[i][CONST.pages.active.columns.name] === CONST.pages.active.regcolors.registered,	//uses background color to determine if a player is registered
 			});
 		}
 		return output;
@@ -607,6 +621,8 @@ Index: ${i}`);
 		group: string;
 		/** New name */
 		newName: string;
+		/** Is the player registered? */
+		registered: boolean;
 	}
 
 	/** Gets all data from new player sheet and returns it as an array */
@@ -621,7 +637,8 @@ Index: ${i}`);
 				name: currentRow[CONST.pages.newPlayers.columns.name],
 				grade: currentRow[CONST.pages.newPlayers.columns.grade],
 				group: currentRow[CONST.pages.newPlayers.columns.group],
-				newName: currentRow[CONST.pages.newPlayers.columns.newName]
+				newName: currentRow[CONST.pages.newPlayers.columns.newName],
+				registered: currentRow[CONST.pages.newPlayers.columns.registered]
 			});
 		}
 		return output;
@@ -634,12 +651,16 @@ Index: ${i}`);
 		TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.newPlayers.template), CONST.pages.newPlayers.defaultRows, CONST.pages.newPlayers.name);
 	}
 
-	export function addGameLog(games: IGamePlayed[])
+	/**
+	 * records games played onto a seperate sheet, each row referes to a single rating period and is encoded using JSON.stringify
+	 * @param weekObj the games for this rating period
+	 */
+	export function addGameLog(weekObj: { games: IGamePlayed[], attendance: { [name: string]: boolean } })
 	{
 		let spreadsheet = SpreadsheetApp.getActive();
 		let sheet = spreadsheet.getSheetByName(CONST.pages.gamesLog.name);
 		if(!sheet)
-			sheet = spreadsheet.insertSheet(CONST.pages.gamesLog.name);
-		sheet.getRange((sheet.getLastRow() || 0) + 1, CONST.pages.gamesLog.columns.data + 1).setValue(JSON.stringify(games));
+			sheet = spreadsheet.insertSheet(CONST.pages.gamesLog.name).hideSheet();
+		sheet.getRange((sheet.getLastRow() || 0) + 1, CONST.pages.gamesLog.columns.data + 1).setValue(JSON.stringify(weekObj));
 	}
 }

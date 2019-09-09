@@ -33,23 +33,48 @@ namespace WeeklyUpdate
 		//get attendance updated by games played
 		adjustAttendance(attendance, gamesPlayed);
 
+		//remove an unregistered player if able
+		tryRemoveLowestPlayer(club.Active, attendance);
+
+		//move people down based on attendance
+		Boards.attendanceModification(club.Active, attendance);
+
 		//update club data with games played
 		consumeGamesPlayed(club, gamesPlayed);
 
-		//do attendance modifications on the club
+		//modify attendance based on who was here
 		for(let i = 0; i < club.Active.length; i++)
 			club.Active[i].absent = attendance.hasOwnProperty(club.Active[i].name);
 
 		if(write)
 		{
 			FrontEnd.resetAttendancePage(club.Active);
-			FrontEnd.addGameLog(gamesPlayed);
+			FrontEnd.addGameLog({ games: gamesPlayed, attendance: attendance });
 			FrontEnd.resetGamesPlayedPage();
 			FrontEnd.setClub(club, write);
 		}
 
 		Logger.log(JSON.stringify(club));
 	}
+
+	/**
+	 * Checks if we are able to remove the lowest player and then does so if conditions are met
+	 * @param club Active club portion
+	 * @param attendance attendance map (used as set)
+	 */
+	function tryRemoveLowestPlayer(club: IPlayer[], attendance: { [name: string]: boolean })
+	{
+		let lastPlace = club[club.length - 1];
+		//condition for removal
+		if(!lastPlace.registered && lastPlace.absent && !attendance.hasOwnProperty(lastPlace.name))
+		{
+			club.pop();
+			lastPlace.isActive = false;
+			return true;
+		}
+		return false;
+	}
+
 
 	/**
 	 * Adjusts the attendance object to include all the people who played games as here
@@ -86,7 +111,10 @@ namespace WeeklyUpdate
 			temp.push(club.Master[player].glicko);
 		Glicko.doRatingPeriod((name: string) => club.Master[name].glicko, games, temp);
 
-		//TODO do board changes (including removing inactive players)
-
+		//go through all games and try and make movements
+		for(let i = 0; i < games.length; i++)
+		{
+			Boards.winBasedMovement()
+		}
 	}
 }

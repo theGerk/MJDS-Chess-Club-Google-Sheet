@@ -6,7 +6,7 @@ namespace Lampert
 	const RATIO = .1;
 	const MAXIMUM_SWING = 100;
 	const MINIMUM_SWING = 1;
-	export const INITIAL_RATING = 1000;
+	export const INITIAL_RATING = CONST.ratings.initialRating;
 
 	/** A lampert rating */
 	export interface IRating

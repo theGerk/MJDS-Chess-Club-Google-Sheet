@@ -5,7 +5,7 @@
 
 
 const CONST = {
-	MommyFontSize: 14,
+	RobinFontSize: 14,
 	pages: {
 		gamesLog: {
 			name: 'Game Log',
@@ -43,6 +43,10 @@ const CONST = {
 				formulaStart: 3,
 				formulaCount: 3,
 			},
+			regcolors: {
+				registered: '#ffff00', // yellow
+				unregistered: '#ffffff', // white
+			},
 			storedWinColumnSize: 19,
 		},
 		games: {
@@ -76,7 +80,8 @@ const CONST = {
 				name: 0,
 				group: 1,
 				grade: 2,
-				newName: 3,
+				registered: 3,
+				newName: 4,
 			},
 			name: 'Update Players',
 			defaultRows: 20,
@@ -89,6 +94,7 @@ const CONST = {
 		'A': 'A',
 	},
 	ratings: {
+		initialRating: 1000,
 	},
 };
 
@@ -117,6 +123,8 @@ interface IPlayer
 	absent: boolean;
 	/** Points the player has */
 	points: number;
+	/** Is the player registered, player must be active or this is ignored */
+	registered: boolean;
 }
 
 

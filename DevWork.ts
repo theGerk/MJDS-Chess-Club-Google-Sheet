@@ -65,7 +65,7 @@ function testRatings()
 
 function testFunction()
 {
-	//FrontEnd.resetGamesPlayedPage();
+	TemplateSheets.generatePageFromTemplate(SpreadsheetApp.getActive(), SpreadsheetApp.getActive().getSheetByName(CONST.pages.newPlayers.template), CONST.pages.newPlayers.defaultRows, CONST.pages.newPlayers.name).activate();
 }
 
 function redoAsIs(write?: boolean)

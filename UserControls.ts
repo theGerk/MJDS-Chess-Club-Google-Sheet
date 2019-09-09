@@ -7,59 +7,61 @@ function updatePlayers(): void
 {
 	let newPlayerData = FrontEnd.getNewPlayerData();
 
-	//Logger.log(JSON.stringify(newPlayerData));
-	//Logger.log(newPlayerData.length);
-
-	let club = FrontEnd.getClub();
-	for(let i = 0; i < newPlayerData.length; i++)
+	if(newPlayerData.length > 0)
 	{
-		let currentNewPlayer = newPlayerData[i];
-
-		//if the player is already in master list, then update the needed info
-		//TODO throw error and highlight red if a new name conflicts with an existing one
-		if(club.Master.hasOwnProperty(currentNewPlayer.name))
+		let club = FrontEnd.getClub();
+		for(let i = 0; i < newPlayerData.length; i++)
 		{
-			let player = club.Master[currentNewPlayer.name];
-			if(currentNewPlayer.grade)
-				player.grade = currentNewPlayer.grade;
-			if(currentNewPlayer.group)
-				player.group = currentNewPlayer.group;
-			if(currentNewPlayer.newName)
-				player.name = currentNewPlayer.newName;
-			if(!player.isActive)
+			let currentNewPlayer = newPlayerData[i];
+
+			//if the player is already in master list, then update the needed info
+			//TODO throw error and highlight red if a new name conflicts with an existing one
+			if(club.Master.hasOwnProperty(currentNewPlayer.name))
 			{
-				player.isActive = true;
-				club.Active.push(player);
-				player.boardNumber = club.Active.length;
+				let player = club.Master[currentNewPlayer.name];
+				if(currentNewPlayer.grade)
+					player.grade = currentNewPlayer.grade;
+				if(currentNewPlayer.group)
+					player.group = currentNewPlayer.group;
+				if(currentNewPlayer.newName)
+					player.name = currentNewPlayer.newName;
+				if(!player.isActive)
+				{
+					player.isActive = true;
+					club.Active.push(player);
+					player.boardNumber = club.Active.length;
+				}
+				player.registered = currentNewPlayer.registered;
 			}
-		}
-		//if the player is not in the master list
-		else
-		{
-			//TODO check to make sure all data is there and highlight red if it isn't. If a new name is given highlight that red and throw error as well.
-			let player: IPlayer = {
-				absent: false,
-				boardNumber: club.Active.length + 1,
-				gamesPlayed: 0,
-				glicko: {
-					deviation: null,
-					rating: Glicko.INITIAL_RATING,
-					volatility: null
-				},
-				grade: currentNewPlayer.grade,
-				group: currentNewPlayer.group,
-				isActive: true,
-				lampert: { rating: Lampert.INITIAL_RATING },
-				name: currentNewPlayer.name,
-				points: 0,
-				storedWins: {}
-			}
+			//if the player is not in the master list
+			else
+			{
+				//TODO check to make sure all data is there and highlight red if it isn't. If a new name is given highlight that red and throw error as well.
+				let player: IPlayer = {
+					absent: false,
+					boardNumber: club.Active.length + 1,
+					gamesPlayed: 0,
+					glicko: {
+						deviation: null,
+						rating: Glicko.INITIAL_RATING,
+						volatility: null
+					},
+					grade: currentNewPlayer.grade,
+					group: currentNewPlayer.group,
+					isActive: true,
+					lampert: { rating: Lampert.INITIAL_RATING },
+					name: currentNewPlayer.name,
+					points: 0,
+					storedWins: {},
+					registered: currentNewPlayer.registered,
+				}
 
-			club.Master[player.name] = player;
-			club.Active.push(player);
+				club.Master[player.name] = player;
+				club.Active.push(player);
+			}
 		}
+		FrontEnd.setClub(club, true);
+		FrontEnd.updateAttendanceSheet(club.Active);
 	}
-	FrontEnd.setClub(club, true);
-	FrontEnd.updateAttendanceSheet(club.Active);
 	FrontEnd.resetNewPlayerPage();
 }
