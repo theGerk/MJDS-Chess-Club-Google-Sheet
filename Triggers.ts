@@ -44,7 +44,7 @@ namespace WeeklyUpdate
 
 		//modify attendance based on who was here
 		for(let i = 0; i < club.Active.length; i++)
-			club.Active[i].absent = attendance.hasOwnProperty(club.Active[i].name);
+			club.Active[i].absent = !attendance.hasOwnProperty(club.Active[i].name);
 
 		if(write)
 		{

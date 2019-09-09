@@ -38,8 +38,8 @@ namespace Glicko
 			return;
 
 		if(!rating.rating)
-			rating.rating = INITIAL_RATING;
-		rating.deviation = INITIAL_RATING;
+			rating.rating = Glicko.INITIAL_RATING;
+		rating.deviation = Glicko.INITIAL_RATING;
 		rating.volatility = INITIAL_VOLATILITY;
 	}
 
@@ -54,7 +54,7 @@ namespace Glicko
 		{
 			if(israted(everyone[i]))
 			{
-				everyone[i].rating = (everyone[i].rating - INITIAL_RATING) / GLICKO_2_CONVERSTION_CONSTANT;
+				everyone[i].rating = (everyone[i].rating - Glicko.INITIAL_RATING) / GLICKO_2_CONVERSTION_CONSTANT;
 				everyone[i].deviation /= GLICKO_2_CONVERSTION_CONSTANT;
 			}
 		}
@@ -66,7 +66,7 @@ namespace Glicko
 		{
 			if(israted(everyone[i]))
 			{
-				everyone[i].rating = everyone[i].rating * GLICKO_2_CONVERSTION_CONSTANT + INITIAL_RATING;
+				everyone[i].rating = everyone[i].rating * GLICKO_2_CONVERSTION_CONSTANT + Glicko.INITIAL_RATING;
 				everyone[i].deviation *= GLICKO_2_CONVERSTION_CONSTANT;
 			}
 		}
