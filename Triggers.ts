@@ -40,7 +40,7 @@ namespace WeeklyUpdate
 		Boards.attendanceModification(club.Active, attendance);
 
 		//update club data with games played
-		consumeGamesPlayed(club, gamesPlayed);
+		consumeGamesPlayed(club, gamesPlayed, attendance);
 
 		//modify attendance based on who was here
 		for(let i = 0; i < club.Active.length; i++)
@@ -94,7 +94,7 @@ namespace WeeklyUpdate
 
 
 	//TODO oh boy a biggy here, lets do it!
-	function consumeGamesPlayed(club: IClub, games: FrontEnd.IGamePlayed[])
+	function consumeGamesPlayed(club: IClub, games: FrontEnd.IGamePlayed[], attendanceObj: { [name: string]: boolean })
 	{
 		//adjusts games played for each player
 		for(let i = 0; i < games.length; i++)
@@ -112,9 +112,6 @@ namespace WeeklyUpdate
 		Glicko.doRatingPeriod((name: string) => club.Master[name].glicko, games, temp);
 
 		//go through all games and try and make movements
-		for(let i = 0; i < games.length; i++)
-		{
-			Boards.winBasedMovement()
-		}
+		Boards.doRatingPeriod(games, club, attendanceObj);
 	}
 }
