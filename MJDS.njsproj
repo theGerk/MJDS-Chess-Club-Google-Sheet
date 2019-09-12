@@ -42,6 +42,7 @@
     <Folder Include="MJDS" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="BoardChange.ts" />
     <TypeScriptCompile Include="FrontEndInterface.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -54,6 +55,7 @@
     <TypeScriptCompile Include="UserControls.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="UserFunctions.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />

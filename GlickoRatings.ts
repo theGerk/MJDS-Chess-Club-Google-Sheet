@@ -25,7 +25,7 @@ namespace Glicko
 	 */
 	function israted(rating: IRating)
 	{
-		return !rating.deviation;
+		return !!rating.deviation;
 	}
 
 	/**
@@ -120,8 +120,8 @@ namespace Glicko
 		//Go through every player that played and make sure they are rated, if they aren't then initialize their rating.
 		for(let i = 0; i < games.length; i++)
 		{
-			setRating(games[i].white);
-			setRating(games[i].black);
+			setRating(ratingMap(games[i].white));
+			setRating(ratingMap(games[i].black));
 		}
 
 		//Step 2: For each player, convert the ratings and RD's (deviation's) onto the Glicko-2 scale.

@@ -26,7 +26,7 @@
 		if(winner.boardNumber > looser.boardNumber)
 		{
 			winner.storedWins[looser.name] = (winner.storedWins[looser.name] || 0) + 1;
-			if(winner.storedWins[looser.name] >= 2)
+			if(movementCondition(winner, looser))
 				winBasedMovement(winner, looser, club, attendance);
 		}
 		else
@@ -65,12 +65,7 @@
 					return;                                      //if a player between the two showed up today then there will be no movement happening
 
 			//will only reach this point if everyone between wasn't there
-			for(let i = winnerIndex; i > looserIndex; i--)
-				moveUp(winnerIndex, club, false);
-
-			//now do jiggle
-			jiggle(winnerIndex, club);
-			jiggle(looserIndex, club);
+			movePlayer(winnerIndex, looserIndex, club);
 		}
 	}
 

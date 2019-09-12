@@ -5,7 +5,6 @@ function onOpen()
 {
 	SpreadsheetApp.getActive().addMenu("Chess", [
 		{ name: 'Add/Update Players', functionName: 'updatePlayers' },
-		{ name: 'Developer Button', functionName: 'testFunction' }
 	]);
 	//var spreadsheet = SpreadsheetApp.getActive();
 	//var menuItems = [
@@ -29,6 +28,24 @@ namespace WeeklyUpdate
 		let attendance = FrontEnd.getAttendanceSheetData();
 		let gamesPlayed = FrontEnd.getGamesPlayedData();
 		let club = FrontEnd.getClub();
+
+		//remove pairs that happened mroe then once
+		let matchCount: { [matchString: string]: number } = {};
+		for(let i = 0; i < gamesPlayed.length; i++)
+		{
+			let match = [gamesPlayed[i].white, gamesPlayed[i].black];
+			match = match.sort();
+			let matchStr = JSON.stringify(match);
+			if(matchCount[matchStr] >= CONST.maximumOfSameMatchPerWeek)
+			{
+				gamesPlayed.splice(i, 1);	//removes ith element
+				i--;
+			}
+			else
+			{
+				matchCount[matchStr] = (matchCount[matchStr] || 0) + 1;
+			}
+		}
 
 		//get attendance updated by games played
 		adjustAttendance(attendance, gamesPlayed);

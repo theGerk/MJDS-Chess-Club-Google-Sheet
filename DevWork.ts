@@ -23,11 +23,22 @@ function thisfunc()
 	throw new Error("Hello benji's inbox.");
 }
 
+function testGlicko()
+{
+	let club = FrontEnd.getClub();
+	let games = FrontEnd.getGamesPlayedData();
 
+	let everyone = [];
+	for(let person in club.Master)
+		everyone.push(club.Master[person].glicko);
+
+	Glicko.doRatingPeriod((p) => club.Master[p].glicko, games, everyone);
+	return club;
+}
 
 function testBoards()
 {
-	let club = FrontEnd.getClub;
+	let club = FrontEnd.getClub();
 	let attendance = FrontEnd.getAttendanceSheetData();
 	let games = FrontEnd.getGamesPlayedData();
 
@@ -37,17 +48,25 @@ function testBoards()
 		attendance[games[i].black] = true;
 	}
 
+	Boards.attendanceModification(club.Active, attendance);
+	Boards.doRatingPeriod(games, club, attendance);
+	return club;
+}
 
+function setMasterSheet()
+{
+	let club = FrontEnd.getClub();
+	FrontEnd.setClub(club, true);
 }
 
 function revert()
 {
 	let ss = SpreadsheetApp.getActive();
 	let names = [
-		CONST.pages.active.name,
-		CONST.pages.attendance.name,
-		CONST.pages.games.name,
 		CONST.pages.master.name,
+		CONST.pages.active.name,
+		CONST.pages.games.name,
+		CONST.pages.attendance.name,
 	];
 
 	let pretext = 'Copy of ';

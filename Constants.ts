@@ -94,6 +94,7 @@ const CONST = {
 	ratings: {
 		initialRating: 1000,
 	},
+	maximumOfSameMatchPerWeek: 2,
 };
 
 /** Represents the most general player */

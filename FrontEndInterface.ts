@@ -49,9 +49,9 @@ namespace FrontEnd
 			output.Active[currentRow.board - 1] = currentPlayer;
 		}
 
-		//can remove this later, simply used for initial run
-		//for(let i = 0; i < activeList.length; i++)
-		//	output.Active[i].storedWins = convertStoredWinsArrayToObject(activeList[i].storedWins, output.Active);
+		//TODO can remove this later, simply used for initial run
+		for(let i = 0; i < activeList.length; i++)
+			output.Active[i].storedWins = convertStoredWinsArrayToObject(activeList[i].storedWins, output.Active);
 
 		return output;
 	}
@@ -238,8 +238,9 @@ namespace FrontEnd
 			for(let opponentName in readRow.storedWins)
 			{
 				let value = readRow.storedWins[opponentName];
-				if(value > 2)
-					value = 2;
+				//this value is used as a work around for now, maybe later fix it so it can go as high as desried.
+				if(value > 9)
+					value = 9;
 
 				if(oldToNew_NameMap.hasOwnProperty(opponentName))
 					storedWins[oldToNew_NameMap[opponentName]] = value;
