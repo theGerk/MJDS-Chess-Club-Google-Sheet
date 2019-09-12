@@ -44,7 +44,7 @@ namespace WeeklyUpdate
 
 		//modify attendance based on who was here
 		for(let i = 0; i < club.Active.length; i++)
-			club.Active[i].absent = !attendance.hasOwnProperty(club.Active[i].name);
+			club.Active[i].absent = !attendance[club.Active[i].name];
 
 		if(write)
 		{
@@ -66,7 +66,7 @@ namespace WeeklyUpdate
 	{
 		let lastPlace = club[club.length - 1];
 		//condition for removal
-		if(!lastPlace.registered && lastPlace.absent && !attendance.hasOwnProperty(lastPlace.name))
+		if(!lastPlace.registered && lastPlace.absent && !attendance[lastPlace.name])
 		{
 			club.pop();
 			lastPlace.isActive = false;

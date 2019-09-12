@@ -1,6 +1,6 @@
 ﻿namespace Boards
 {
-	export function doRatingPeriod(games: FrontEnd.IGamePlayed[], club: IClub, attendanceSet: { [name: string]: boolean })
+	export function doRatingPeriod(games: FrontEnd.IGamePlayed[], club: IClub, attendance: { [name: string]: boolean })
 	{
 		for(let i = 0; i < games.length; i++)
 		{
@@ -8,10 +8,10 @@
 			switch(game.result)
 			{
 				case 0:
-					makeGameUpdate(club.Master[game.black], club.Master[game.white], club.Active, attendanceSet);
+					makeGameUpdate(club.Master[game.black], club.Master[game.white], club.Active, attendance);
 					break;
 				case 1:
-					makeGameUpdate(club.Master[game.white], club.Master[game.black], club.Active, attendanceSet);
+					makeGameUpdate(club.Master[game.white], club.Master[game.black], club.Active, attendance);
 					break;
 				default:
 					//remove stored wins for both
@@ -21,21 +21,21 @@
 		}
 	}
 
-	function makeGameUpdate(winner: IPlayer, looser: IPlayer, club: IPlayer[], attendanceSet: { [name: string]: boolean })
+	function makeGameUpdate(winner: IPlayer, looser: IPlayer, club: IPlayer[], attendance: { [name: string]: boolean })
 	{
 		if(winner.boardNumber > looser.boardNumber)
 		{
 			winner.storedWins[looser.name] = winner.storedWins[looser.name] + 1 || 1;
 			if(winner.storedWins[looser.name] >= 2)
-				winBasedMovement(winner, looser, club, attendanceSet);
+				winBasedMovement(winner, looser, club, attendance);
 		}
 		else
 			delete looser.storedWins[winner.name];
 	}
 
-	export function attendanceModification(club: IPlayer[], attendanceSet: { [name: string]: boolean })
+	export function attendanceModification(club: IPlayer[], attendance: { [name: string]: boolean })
 	{
-		let condition = (player: IPlayer) => player.absent && !attendanceSet.hasOwnProperty(player.name);
+		let condition = (player: IPlayer) => player.absent && !attendance[player.name];
 
 
 		let i = club.length - 1;
@@ -49,11 +49,9 @@
 		for(; i >= 0; i--)
 			if(condition(club[i]))
 				moveDown(i, club, false);
-
-
 	}
 
-	function winBasedMovement(winner: IPlayer, looser: IPlayer, club: IPlayer[], attendanceSet: { [name: string]: boolean })
+	function winBasedMovement(winner: IPlayer, looser: IPlayer, club: IPlayer[], attendance: { [name: string]: boolean })
 	{
 		let winnerIndex = winner.boardNumber - 1;
 		let looserIndex = looser.boardNumber - 1;
@@ -63,7 +61,7 @@
 		{
 			//check to make sure everyone between them is absent today
 			for(let i = looserIndex + 1; i < winnerIndex; i++)
-				if(attendanceSet.hasOwnProperty(club[i].name))
+				if(attendance[club[i].name])
 					return;                                      //if a player between the two showed up today then there will be no movement happening
 
 			//will only reach this point if everyone between wasn't there
