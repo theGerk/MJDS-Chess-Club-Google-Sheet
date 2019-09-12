@@ -25,7 +25,7 @@
 	{
 		if(winner.boardNumber > looser.boardNumber)
 		{
-			winner.storedWins[looser.name] = winner.storedWins[looser.name] + 1 || 1;
+			winner.storedWins[looser.name] = (winner.storedWins[looser.name] || 0) + 1;
 			if(winner.storedWins[looser.name] >= 2)
 				winBasedMovement(winner, looser, club, attendance);
 		}

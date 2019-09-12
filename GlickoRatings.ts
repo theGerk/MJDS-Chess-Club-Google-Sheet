@@ -37,9 +37,8 @@ namespace Glicko
 		if(israted(rating))
 			return;
 
-		if(!rating.rating)
-			rating.rating = Glicko.INITIAL_RATING;
-		rating.deviation = Glicko.INITIAL_RATING;
+		//rating should already be set
+		rating.deviation = Glicko.INITIAL_DEVIATION;
 		rating.volatility = INITIAL_VOLATILITY;
 	}
 

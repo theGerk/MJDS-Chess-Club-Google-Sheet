@@ -24,6 +24,48 @@ function thisfunc()
 }
 
 
+
+function testBoards()
+{
+	let club = FrontEnd.getClub;
+	let attendance = FrontEnd.getAttendanceSheetData();
+	let games = FrontEnd.getGamesPlayedData();
+
+	for(var i = 0; i < games.length; i++)
+	{
+		attendance[games[i].white] = true;
+		attendance[games[i].black] = true;
+	}
+
+
+}
+
+function revert()
+{
+	let ss = SpreadsheetApp.getActive();
+	let names = [
+		CONST.pages.active.name,
+		CONST.pages.attendance.name,
+		CONST.pages.games.name,
+		CONST.pages.master.name,
+	];
+
+	let pretext = 'Copy of ';
+
+	for(let i = 0; i < names.length; i++)
+	{
+		let sheet = ss.getSheetByName(names[i]);
+		let copy = ss.getSheetByName(pretext + names[i]);
+
+		ss.deleteSheet(sheet);
+		ss.insertSheet(names[i], i, { template: copy }).showSheet();
+	}
+
+
+	ss.deleteSheet(ss.getSheetByName(CONST.pages.gamesLog.name));
+}
+
+
 function testRatings()
 {
 	let activeData = FrontEnd.getClub().Active;
@@ -37,7 +79,7 @@ function testRatings()
 	}
 
 	let s = SpreadsheetApp.getActive();
-	let output1: any[][] = [['winner', 'old rating', 'new rating', 'looser','old rating', 'new rating']]
+	let output1: any[][] = [['winner', 'old rating', 'new rating', 'looser', 'old rating', 'new rating']]
 	for(let i = 0; i < games.length; i++)
 	{
 		let current = games[i];

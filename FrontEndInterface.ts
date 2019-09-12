@@ -551,6 +551,9 @@ Index: ${i}`);
 			row[CONST.pages.active.columns.missed] = club[i].absent;
 			row[CONST.pages.active.columns.name] = club[i].name;
 			row[CONST.pages.active.columns.points] = club[i].points;
+			row[CONST.pages.active.columns.rating] = club[i].lampert.rating;
+			row[CONST.pages.active.columns.grade] = club[i].grade;
+			row[CONST.pages.active.columns.group] = club[i].group;
 
 			//make stored wins table
 			//TODO add mirror image part
@@ -568,13 +571,10 @@ Index: ${i}`);
 		if(write)
 		{
 			let page = TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.active.template), club.length, CONST.pages.active.name);
-			let range = page.getRange(2, CONST.pages.active.columns.formulaStart, output.length, CONST.pages.active.columns.formulaCount);
-			let formulas = range.getFormulas();
 			page.getRange(2, 1, output.length, output[0].length).setValues(output);
 			page.setColumnWidths(CONST.pages.active.columns.wins + 1, club.length, CONST.pages.active.storedWinColumnSize);
+			page.getDataRange().setFontSize(CONST.RobinFontSize);
 			page.autoResizeColumns(1, CONST.pages.active.columns.wins);
-			page.getDataRange().setFontSize(CONST.RobinFontSize)
-			range.setFormulas(formulas);
 
 			//Set background color for names to determine registered or not.
 			page.getRange(2, CONST.pages.active.columns.name + 1, backgrounds.length).setBackgrounds(backgrounds);

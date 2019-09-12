@@ -40,8 +40,6 @@ const CONST = {
 				points: 5,
 				missed: 6,
 				wins: 7,
-				formulaStart: 3,
-				formulaCount: 3,
 			},
 			regcolors: {
 				registered: '#ffff00', // yellow
