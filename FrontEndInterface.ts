@@ -450,7 +450,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 	export function resetAttendancePage(activePlayers: IPlayer[])
 	{
 		let s = SpreadsheetApp.getActive();
-		let sheet = TemplateSheets.generatePageFromTemplate(s, s.getSheetByName(CONST.pages.attendance.template), activePlayers.length, CONST.pages.attendance.name);
+		let sheet = TemplateSheets.generate(s, s.getSheetByName(CONST.pages.attendance.template), activePlayers.length, CONST.pages.attendance.name);
 		let output: any[][] = [];
 		for(let i = 0; i < activePlayers.length; i++)
 			output.push([activePlayers[i].name]);
@@ -467,7 +467,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		let s = SpreadsheetApp.getActive();
 		let sheet = s.getSheetByName(CONST.pages.attendance.name);
 		let savedAttenance = sheet.getRange(2, CONST.pages.attendance.columns.attend + 1, sheet.getLastRow() - 1).getValues();
-		sheet = TemplateSheets.generatePageFromTemplate(s, s.getSheetByName(CONST.pages.attendance.template), activePlayers.length, CONST.pages.attendance.name);
+		sheet = TemplateSheets.generate(s, s.getSheetByName(CONST.pages.attendance.template), activePlayers.length, CONST.pages.attendance.name);
 		let output: any[][] = [];
 		for(let i = 0; i < activePlayers.length; i++)
 		{
@@ -571,7 +571,7 @@ Index: ${i}`);
 		let spreadsheet = SpreadsheetApp.getActive();
 		if(write)
 		{
-			let page = TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.active.template), club.length, CONST.pages.active.name);
+			let page = TemplateSheets.generate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.active.template), club.length, CONST.pages.active.name);
 			page.getRange(2, 1, output.length, output[0].length).setValues(output);
 			page.setColumnWidths(CONST.pages.active.columns.wins + 1, club.length, CONST.pages.active.storedWinColumnSize);
 			page.getDataRange().setFontSize(CONST.RobinFontSize);
@@ -649,7 +649,7 @@ Index: ${i}`);
 	export function resetNewPlayerPage()
 	{
 		let spreadsheet = SpreadsheetApp.getActive();
-		TemplateSheets.generatePageFromTemplate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.newPlayers.template), CONST.pages.newPlayers.defaultRows, CONST.pages.newPlayers.name);
+		TemplateSheets.generate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.newPlayers.template), CONST.pages.newPlayers.defaultRows, CONST.pages.newPlayers.name);
 	}
 
 	/**

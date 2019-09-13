@@ -34,7 +34,7 @@ namespace TemplateSheets
 	 * @param sheetIndex the new sheet's index (optional)
 	 * @returns the generated sheet
 	 */
-	export function generatePageFromTemplate(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet, template: GoogleAppsScript.Spreadsheet.Sheet, rows: number, sheetName?: string, sheetIndex?: number)
+	export function generate(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet, template: GoogleAppsScript.Spreadsheet.Sheet, rows: number, sheetName?: string, sheetIndex?: number)
 	{
 		//Logger.log(`${template.getName()} - ${rows} on ${sheetName}.`);
 		let sheet: GoogleAppsScript.Spreadsheet.Sheet;

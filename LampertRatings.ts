@@ -77,7 +77,11 @@ namespace Lampert
 		}
 	}
 
-
+	/**
+	 * Does an entire rating period, taking in all the games played and makes appropriate rating modifications
+	 * @param ratingMap A map from some key to the rating object. the key's type must be the same as the type of white and black in the games object
+	 * @param games An array of objects refering to a game, white is the key for the white player, black is the key for the black player, and the result is the result from white's perspective.
+	 */
 	export function doRatingPeriod(ratingMap: (key: any) => IRating, games: { white: any, black: any, result: number }[])
 	{
 		for(let i = 0; i < games.length; i++)

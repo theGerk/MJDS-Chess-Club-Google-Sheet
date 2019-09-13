@@ -1,11 +1,16 @@
 ﻿///<reference path="Constants.ts"/>
 
+/** Works using GLICKO-2, but with some minor midifications to what the initial rating and deviations are. This doesn't actually change the algorithm, simply sifts the curve slightly */
 namespace Glicko
 {
+	/** The rating interface, describes what a glicko rating must have. */
 	export interface IRating
 	{
+		/** The rating */
 		rating: number;
+		/** The deviation */
 		deviation: number;
+		/** The volatility, this is kept secret. */
 		volatility: number;
 	}
 
@@ -59,6 +64,10 @@ namespace Glicko
 		}
 	}
 
+	/**
+	 * Converts from the standard glicko ratings (normalized about 0), to the user facing values. Skips anyone who is yet to be rated
+	 * @param everyone an array of everyone's glicko rating
+	 */
 	function convertFromGlicko2(everyone: IRating[])
 	{
 		for(let i = 0; i < everyone.length; i++)

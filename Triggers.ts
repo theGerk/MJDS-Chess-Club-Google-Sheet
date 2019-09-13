@@ -19,10 +19,15 @@ function weeklyUpdate()
 {
 	WeeklyUpdate.doAll(true);
 }
-
+/** Namespace for everything that needs to be done to update the club after a week of games */
 namespace WeeklyUpdate
 {
 	//TODO there are some things left, not much here
+	/**
+	 * Does all the stuff for a weekly update.
+	 * 
+	 * @param write should anything be written to the document, a truthy value will have the document written.
+	 */
 	export function doAll(write?: boolean)
 	{
 		let attendance = FrontEnd.getAttendanceSheetData();
@@ -54,7 +59,7 @@ namespace WeeklyUpdate
 		tryRemoveLowestPlayer(club.Active, attendance);
 
 		//move people down based on attendance
-		Boards.attendanceModification(club.Active, attendance);
+		Boards.attendanceBasedMovement(club.Active, attendance);
 
 		//update club data with games played
 		consumeGamesPlayed(club, gamesPlayed, attendance);
@@ -71,7 +76,7 @@ namespace WeeklyUpdate
 			FrontEnd.setClub(club, write);
 		}
 
-		Logger.log(JSON.stringify(club));
+		//Logger.log(JSON.stringify(club));
 	}
 
 	/**
@@ -110,7 +115,17 @@ namespace WeeklyUpdate
 	}
 
 
-	//TODO oh boy a biggy here, lets do it!
+	/**
+	 * This consumes all the games played during a rating period (one week) does all modifications:
+	 *	Moves down players who haven't been there in two weeks.
+	 *	Makes board changes based on rating
+	 *	Makes lampert rating changes
+	 *	Makes Glicko rating changes
+	 *	Counts games played and adds that to the players
+	 * @param club The club object
+	 * @param games array of all games played
+	 * @param attendanceObj attendance object, mapping player to if they were here today
+	 */
 	function consumeGamesPlayed(club: IClub, games: FrontEnd.IGamePlayed[], attendanceObj: { [name: string]: boolean })
 	{
 		//adjusts games played for each player

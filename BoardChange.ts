@@ -1,5 +1,13 @@
-﻿namespace Boards
+﻿/** All board change modifications */
+namespace Boards
 {
+	/**
+	 * Consumes an array of games and does all the board change modifications. The name simply is to stick with the convention set from the rating packages.
+	 * 
+	 * @param games An array of games played
+	 * @param club the club object
+	 * @param attendance A map from everyone active to weather or not they were here today
+	 */
 	export function doRatingPeriod(games: FrontEnd.IGamePlayed[], club: IClub, attendance: { [name: string]: boolean })
 	{
 		for(let i = 0; i < games.length; i++)
@@ -8,10 +16,10 @@
 			switch(game.result)
 			{
 				case 0:
-					makeGameUpdate(club.Master[game.black], club.Master[game.white], club.Active, attendance);
+					win_loss(club.Master[game.black], club.Master[game.white], club.Active, attendance);
 					break;
 				case 1:
-					makeGameUpdate(club.Master[game.white], club.Master[game.black], club.Active, attendance);
+					win_loss(club.Master[game.white], club.Master[game.black], club.Active, attendance);
 					break;
 				default:
 					//remove stored wins for both
@@ -21,19 +29,55 @@
 		}
 	}
 
-	function makeGameUpdate(winner: IPlayer, looser: IPlayer, club: IPlayer[], attendance: { [name: string]: boolean })
+	/**
+	 * Just remove a win from a player against the other if it exists.
+	 * 
+	 * @param player1 A reference to one of the players
+	 * @param player2 A reference to the other player
+	 */
+	function draw(player1: IPlayer, player2: IPlayer)
 	{
+		/** 
+		 *  moves the win counter down one if it exists and is not zero.
+		 *  @param player The player having a win taken away from
+		 *  @param opponent The player for whom p1 is loosing a win against.
+		 */
+		function removeWin(player: IPlayer, opponent: IPlayer)
+		{
+			if(player.storedWins[opponent.name])
+				player.storedWins[opponent.name]--;
+		}
+		removeWin(player1, player2);
+		removeWin(player2, player1);
+	}
+
+	/**
+	 * Makes any changes to stored wins and board numbers needed after a win happens
+	 * @param winner A reference to the winner of the game
+	 * @param looser A reference to the looser of the game
+	 * @param club The array of all active players
+	 * @param attendance The attendance object mapping active player names to if they are here.
+	 */
+	function win_loss(winner: IPlayer, looser: IPlayer, club: IPlayer[], attendance: { [name: string]: boolean })
+	{
+		//if the winner is ranked lower than the looser
 		if(winner.boardNumber > looser.boardNumber)
 		{
-			winner.storedWins[looser.name] = (winner.storedWins[looser.name] || 0) + 1;
+			winner.storedWins[looser.name] = (winner.storedWins[looser.name] || 0) + 1;	//adds one to the stored wins
 			if(movementCondition(winner, looser))
 				winBasedMovement(winner, looser, club, attendance);
 		}
+		//if the winner is ranked above the looser
 		else
-			delete looser.storedWins[winner.name];
+			delete looser.storedWins[winner.name];	//removes any and all stored wins the looser has against the winner
 	}
 
-	export function attendanceModification(club: IPlayer[], attendance: { [name: string]: boolean })
+	/**
+	 * Makes modification to board numbers based on attendance
+	 * @param club Array of active players
+	 * @param attendance Attendance map (from player names to if they are here today)
+	 */
+	export function attendanceBasedMovement(club: IPlayer[], attendance: { [name: string]: boolean })
 	{
 		let condition = (player: IPlayer) => player.absent && !attendance[player.name];
 
@@ -51,6 +95,14 @@
 				moveDown(i, club, false);
 	}
 
+	/**
+	 * Makes a board change based on a win or loss.
+	 * 
+	 * @param winner the winner of the game
+	 * @param looser the looser of the game
+	 * @param club an array of all the players in the club
+	 * @param attendance a map from player name to if they are here today
+	 */
 	function winBasedMovement(winner: IPlayer, looser: IPlayer, club: IPlayer[], attendance: { [name: string]: boolean })
 	{
 		let winnerIndex = winner.boardNumber - 1;
@@ -69,8 +121,13 @@
 		}
 	}
 
-
-	//TODO, make a list of requirements and then do them.
+	/**
+	 * Moves a player from startIndex to endIndex
+	 * 
+	 * @param startIndex The start index, this is zero based
+	 * @param endIndex The end index, this is zero based
+	 * @param club The array of active players in the club
+	 */
 	function movePlayer(startIndex: number, endIndex: number, club: IPlayer[])
 	{
 		if(startIndex < endIndex)
@@ -108,31 +165,24 @@
 
 
 	/**
-	 * Recursive jiggle function to do repeated board changes
+	 * Recursive jiggle function to do repeated board changes. This solves if board 5 already has two wins against board 3 then when they beat board 4 twice they get jiggled up to board 3.
 	 * @param index target index to jiggle
 	 * @param club entire active club
-	 * @returns if jiggle occured
 	 */
 	function jiggle(index: number, club: IPlayer[])
 	{
+		//some notes on how this works and why else if is used rather than two ifs.
+		//Statement: It is impossible to every have to both jiggle up and jiggle down.
+		//Proof: This function is only ever called after a movement takes place. If the movement was the player moving upwards then the player immediatly below him used to be above him and thus can not have any stored wins against this player. For the movement in the other direction the same argument is made in the other direction. QED
+		//This means it is optimal to is if else, however there is another reason. A player may be jiggled up and then the new target may be ready to jiggle down. While we would of course want to do this jiggle, this is not the place to do it as it will be covered by the recursion. 
+
 		//jiggle up
 		if(index > 0 && movementCondition(club[index], club[index - 1]))
-		{
 			moveUp(index, club, true);
-			return true;
-		}
 
 		//jiggle down
 		else if(index < club.length - 1 && movementCondition(club[index + 1], club[index]))
-		{
 			moveDown(index, club, true);
-			return true;
-		}
-
-		else
-		{
-			return false;
-		}
 	}
 
 

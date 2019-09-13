@@ -3,7 +3,7 @@
 /// <reference path="TemplatePages.ts"/>
 
 
-
+/** Constants object, useful for many global constants. */
 const CONST = {
 	RobinFontSize: 14,
 	pages: {
