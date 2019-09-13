@@ -310,12 +310,17 @@ namespace FrontEnd
 				let temp = storedWinsString.split(CONST.pages.master.storedWinSeperator);
 				for(let j = 0; j < temp.length; j++)
 				{
-					let opponenet_name = temp[j].substring(0, temp[j].length - 2);
-					//TODO add try catch around next line to allow for not having a number in the stored wins list for the master sheet
-					//Currently only allows "Harry Potter 1, Ginny Weasly 2"
-					//Should be equivalent to "Harry Potter, Ginny Weasly 2" or "Harry Potter 1, Ginny Weasly, Ginny Weasly"
-					//Update: Maybe don't do this as it prevents a name from ending with a number as in the case of "James Potter_0" and James Potter_1", maybe this isn't an issue but requires further thought.
-					let number = parseInt(temp[j].substring(temp[j].length - 1));
+					//splits the string by spaces, then takes the last part to be the number
+					let splitOnSpace = temp[j].split(' ');
+					let number = parseInt(splitOnSpace[splitOnSpace.length - 1]);
+
+					//if the number was not included set the number to 1, and combine the entire array for the name otherwise just combine everything but the last part in the array
+					if(number === NaN)
+						number = 1;
+					else
+						splitOnSpace.pop();
+
+					let opponenet_name = splitOnSpace.join(' ');
 
 					if(storedWinsObject.hasOwnProperty(opponenet_name))
 						storedWinsObject[opponenet_name] += number;
@@ -490,6 +495,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 			grade: input.grade,
 			group: input.group,
 			lampertRating: input.lampert.rating,
+			roundedGlickoRating: Math.round(input.glicko.rating),
 			points: input.points,
 			registered: input.registered,
 		};
@@ -506,6 +512,8 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		storedWins: number[];
 		/** The Lampert Rating */
 		lampertRating: number;
+		/** The glicko rating rounded */
+		roundedGlickoRating: number;
 		/** The group */
 		group: string;
 		/** The grade */
@@ -552,9 +560,10 @@ Index: ${i}`);
 			row[CONST.pages.active.columns.missed] = club[i].absent;
 			row[CONST.pages.active.columns.name] = club[i].name;
 			row[CONST.pages.active.columns.points] = club[i].points;
-			row[CONST.pages.active.columns.rating] = club[i].lampert.rating;
+			row[CONST.pages.active.columns.LampertRating] = club[i].lampert.rating;
 			row[CONST.pages.active.columns.grade] = club[i].grade;
 			row[CONST.pages.active.columns.group] = club[i].group;
+			row[CONST.pages.active.columns.GlickoRating] = Math.round(club[i].glicko.rating);
 
 			//make stored wins table
 			//TODO add mirror image part
@@ -597,10 +606,11 @@ Index: ${i}`);
 			/** The current board number */
 			let board = currentRow[CONST.pages.active.columns.board];
 			output.push({
+				roundedGlickoRating: currentRow[CONST.pages.active.columns.GlickoRating],
 				name: currentRow[CONST.pages.active.columns.name],
 				board: board,
 				storedWins: currentRow.slice(CONST.pages.active.columns.wins, CONST.pages.active.columns.wins + board - 1),
-				lampertRating: currentRow[CONST.pages.active.columns.rating],
+				lampertRating: currentRow[CONST.pages.active.columns.LampertRating],
 				grade: currentRow[CONST.pages.active.columns.grade],
 				group: currentRow[CONST.pages.active.columns.group],
 				points: currentRow[CONST.pages.active.columns.points],

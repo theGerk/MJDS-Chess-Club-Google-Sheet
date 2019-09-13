@@ -36,10 +36,11 @@ const CONST = {
 				name: 1,
 				group: 2,
 				grade: 3,
-				rating: 4,
-				points: 5,
-				missed: 6,
-				wins: 7,
+				LampertRating: 4,
+				GlickoRating: 5,
+				points: 6,
+				missed: 7,
+				wins: 8,
 			},
 			regcolors: {
 				registered: '#ffff00', // yellow
