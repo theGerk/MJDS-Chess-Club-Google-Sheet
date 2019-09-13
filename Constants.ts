@@ -31,6 +31,9 @@ const CONST = {
 		active: {
 			template: 'PrintPage-template',
 			name: 'Print Page',
+			ranges: {
+				players: 'ACTIVE_PLAYERS',
+			},
 			columns: {
 				board: 0,
 				name: 1,

@@ -580,14 +580,23 @@ Index: ${i}`);
 		let spreadsheet = SpreadsheetApp.getActive();
 		if(write)
 		{
+			//capture the old named range
+			let theNamedRange = spreadsheet.getSheetByName(CONST.pages.active.name).getNamedRanges().filter((s) => s.getName() === CONST.pages.active.ranges.players)[0];
+
 			let page = TemplateSheets.generate(spreadsheet, spreadsheet.getSheetByName(CONST.pages.active.template), club.length, CONST.pages.active.name);
 			page.getRange(2, 1, output.length, output[0].length).setValues(output);
 			page.setColumnWidths(CONST.pages.active.columns.wins + 1, club.length, CONST.pages.active.storedWinColumnSize);
 			page.getDataRange().setFontSize(CONST.RobinFontSize);
 			page.autoResizeColumns(1, CONST.pages.active.columns.wins);
 
+
+			let names = page.getRange(2, CONST.pages.active.columns.name + 1, output.length);
+
+			//set named range to having this range (used for games played page)
+			theNamedRange.setRange(page.getRange(2, 1, output.length));
+
 			//Set background color for names to determine registered or not.
-			page.getRange(2, CONST.pages.active.columns.name + 1, backgrounds.length).setBackgrounds(backgrounds);
+			names.setBackgrounds(backgrounds);
 		}
 
 		return output;
