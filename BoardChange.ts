@@ -22,8 +22,7 @@ namespace Boards
 					win_loss(club.Master[game.white], club.Master[game.black], club.Active, attendance);
 					break;
 				default:
-					//remove stored wins for both
-					//TODO do this
+					draw(club.Master[game.white], club.Master[game.black]);
 					break;
 			}
 		}
@@ -81,18 +80,20 @@ namespace Boards
 	{
 		let condition = (player: IPlayer) => player.absent && !attendance[player.name];
 
+		/** Should be the equivalent to if the person below me is here today. */
+		let canMove = false;
 
-		let i = club.length - 1;
+		for(let i = club.length - 1; i >= 0; i--)
+		{
+			let current = club[i];
 
-		//go through all players who should be moved, but can not go down
-		for(; i >= 0; i--)
-			if(!condition(club[i]))
-				break;
-
-		//now we can start moving players
-		for(; i >= 0; i--)
-			if(condition(club[i]))
+			if(canMove && condition(current))
 				moveDown(i, club, false);
+
+			//set canMove
+			//if the player is here, then the player above may be able to move
+			canMove = attendance[current.name]
+		}
 	}
 
 	/**
