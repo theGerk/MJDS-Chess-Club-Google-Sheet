@@ -49,9 +49,9 @@ namespace FrontEnd
 			output.Active[currentRow.board - 1] = currentPlayer;
 		}
 
-		//TODO can remove this later, simply used for initial run
-		for(let i = 0; i < activeList.length; i++)
-			output.Active[i].storedWins = convertStoredWinsArrayToObject(activeList[i].storedWins, output.Active);
+		//can remove this later, simply used for initial run
+		//for(let i = 0; i < activeList.length; i++)
+		//	output.Active[i].storedWins = convertStoredWinsArrayToObject(activeList[i].storedWins, output.Active);
 
 		return output;
 	}
@@ -101,6 +101,8 @@ namespace FrontEnd
 		let output: { [name: string]: number } = {};
 		for(var i = 0; i < input.length && i < club.length; i++)
 		{
+			if(input[i])
+				Logger.log(input[i]);
 			if(input[i] > 0)
 				output[club[i].name] = input[i];
 		}
@@ -553,23 +555,30 @@ Index: ${i}`);
 		let backgrounds: string[][] = [];
 		for(let i = 0; i < club.length; i++)
 		{
+			let me = club[i];
 			let row = [];
 			for(let j = 0; j < CONST.pages.active.columns.wins + club.length; j++)
 				row.push('');
 			row[CONST.pages.active.columns.board] = i + 1;
-			row[CONST.pages.active.columns.missed] = club[i].absent;
-			row[CONST.pages.active.columns.name] = club[i].name;
-			row[CONST.pages.active.columns.points] = club[i].points;
-			row[CONST.pages.active.columns.LampertRating] = club[i].lampert.rating;
-			row[CONST.pages.active.columns.grade] = club[i].grade;
-			row[CONST.pages.active.columns.group] = club[i].group;
-			row[CONST.pages.active.columns.GlickoRating] = Math.round(club[i].glicko.rating);
+			row[CONST.pages.active.columns.missed] = me.absent;
+			row[CONST.pages.active.columns.name] = me.name;
+			row[CONST.pages.active.columns.points] = me.points;
+			row[CONST.pages.active.columns.LampertRating] = me.lampert.rating;
+			row[CONST.pages.active.columns.grade] = me.grade;
+			row[CONST.pages.active.columns.group] = me.group;
+			row[CONST.pages.active.columns.GlickoRating] = Math.round(me.glicko.rating);
 
 			//make stored wins table
-			//TODO add mirror image part
-			for(let name in club[i].storedWins)
-				if(nameToIndexMap[name] < i)
-					row[CONST.pages.active.columns.wins + nameToIndexMap[name]] = club[i].storedWins[name];
+			for(let name in me.storedWins)
+			{
+				let index = nameToIndexMap[name];
+				if(index < i)
+				{
+					let value = me.storedWins[name];
+					row[CONST.pages.active.columns.wins + index] = value;       //current row value
+					output[index][CONST.pages.active.columns.wins + i] = value; //mirrored value
+				}
+			}
 			row[CONST.pages.active.columns.wins + i] = 'X';
 			output.push(row);
 
@@ -627,7 +636,7 @@ Index: ${i}`);
 				registered: backgrounds[i][CONST.pages.active.columns.name] === CONST.pages.active.regcolors.registered,	//uses background color to determine if a player is registered
 			});
 		}
-		return output;
+		return output.sort((r)=> r.board);
 	}
 
 	/** All data for a single row from new player page */

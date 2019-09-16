@@ -146,5 +146,5 @@ function testFunction()
 function redoAsIs(write?: boolean)
 {
 	let club = FrontEnd.getClub();
-	FrontEnd.setClub(club, write);
+	Logger.log(FrontEnd.setClub(club, write));
 }

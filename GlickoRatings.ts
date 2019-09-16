@@ -123,7 +123,13 @@ namespace Glicko
 		return output;
 	}
 
-	export function doRatingPeriod(ratingMap: (key: any) => IRating, games: { white: any, black: any, result: number }[], everyone: IRating[])
+	/**
+	 * Does a rating period of glicko ratings
+	 * @param ratingMap Takes in some identifier and returns a reference to a rating object.
+	 * @param games Has a white and black player and result from white's persective, white and black will be fed into the ratingMap to get their rating object
+	 * @param everyone A array of every rating object in the system.
+	 */
+	export function doRatingPeriod<T>(ratingMap: (key: T) => IRating, games: { white: T, black: T, result: number }[], everyone: IRating[])
 	{
 		//Step 1: Determine a rating and RD (deviation) for each player at the onset of the rating period.
 		//Go through every player that played and make sure they are rated, if they aren't then initialize their rating.
