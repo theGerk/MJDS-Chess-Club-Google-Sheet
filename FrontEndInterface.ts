@@ -602,7 +602,7 @@ Index: ${i}`);
 			let names = page.getRange(2, CONST.pages.active.columns.name + 1, output.length);
 
 			//set named range to having this range (used for games played page)
-			theNamedRange.setRange(page.getRange(2, 1, output.length));
+			theNamedRange.setRange(page.getRange(2, CONST.pages.active.columns.name + 1, output.length));
 
 			//Set background color for names to determine registered or not.
 			names.setBackgrounds(backgrounds);
