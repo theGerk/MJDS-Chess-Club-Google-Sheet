@@ -19,10 +19,11 @@ function weeklyUpdate()
 {
 	WeeklyUpdate.doAll(true);
 }
+
+//TODO move namespace
 /** Namespace for everything that needs to be done to update the club after a week of games */
 namespace WeeklyUpdate
 {
-	//TODO there are some things left, not much here
 	/**
 	 * Does all the stuff for a weekly update.
 	 * 
