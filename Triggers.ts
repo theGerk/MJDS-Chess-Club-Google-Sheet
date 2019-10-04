@@ -35,7 +35,18 @@ namespace WeeklyUpdate
 		let gamesPlayed = FrontEnd.getGamesPlayedData();
 		let club = FrontEnd.getClub();
 
-		//remove pairs that happened mroe then once
+		//if there were no games played this week
+		if(gamesPlayed.length === 0)
+		{
+			//Only do glicko ratings and then end
+			let ratings = [];
+			for(var person in club.Master)
+				ratings.push(club.Master[person].glicko);
+			Glicko.doRatingPeriod<string>(name=>club.Master[name].glicko, [], ratings);
+			return;
+		}
+
+		//remove pairs that happened more than twice
 		let matchCount: { [matchString: string]: number } = {};
 		for(let i = 0; i < gamesPlayed.length; i++)
 		{
