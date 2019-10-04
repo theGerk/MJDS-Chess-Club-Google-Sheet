@@ -60,14 +60,16 @@ namespace TemplateSheets
 		let columns = range.getNumColumns();
 		let validations = range.getDataValidations()[0];
 		let formulas = range.getFormulasR1C1()[0];
+		range.setDataValidation(null);
+
+		//adds rows
+		if(rows > 1)
+			sheet.insertRowsAfter(2, rows - 1);
 
 		for(let col = 0; col < columns; col++)
 		{
 			let target = sheet.getRange(2, col + 1, rows);
-
-			//data validation
-			target.setDataValidation(validations[col]);
-
+			
 			//formating
 			range.getCell(1, col + 1).copyFormatToRange(sheet, col + 1, col + 1, 2, rows + 1);
 
@@ -75,6 +77,9 @@ namespace TemplateSheets
 			let currentFormula = formulas[col];
 			if(currentFormula)
 				target.setFormulaR1C1(currentFormula);
+
+			//data validation
+			target.setDataValidation(validations[col]);
 		}
 
 		sheet.showSheet();
