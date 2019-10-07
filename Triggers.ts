@@ -15,13 +15,17 @@ function onOpen()
 }
 
 
-function yearlyUpdate()
+/** Do update grades */
+function gradeUpdate()
 {
-	function newGrade(grade: string | number) { return CONST.gradeAdvancement[grade] || <number>grade + 1; }
-	let club = FrontEnd.getClub();
-	for(let name in club.Master)
-		club.Master[name].grade = newGrade(club.Master[name].grade);
-	FrontEnd.setClub(club);
+	if(new Date().getMonth() === 6)
+	{
+		let newGrade = (grade: string | number) => CONST.gradeAdvancement[grade] || <number>grade + 1;
+		let club = FrontEnd.getClub();
+		for(let name in club.Master)
+			club.Master[name].grade = newGrade(club.Master[name].grade);
+		FrontEnd.setClub(club);
+	}
 }
 
 
