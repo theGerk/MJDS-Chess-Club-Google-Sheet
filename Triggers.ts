@@ -56,43 +56,44 @@ namespace WeeklyUpdate
 			let ratings = [];
 			for(var person in club.Master)
 				ratings.push(club.Master[person].glicko);
-			Glicko.doRatingPeriod<string>(name=>club.Master[name].glicko, [], ratings);
-			return;
+			Glicko.doRatingPeriod<string>(name => club.Master[name].glicko, [], ratings);
 		}
-
-		//remove pairs that happened more than twice
-		let matchCount: { [matchString: string]: number } = {};
-		for(let i = 0; i < gamesPlayed.length; i++)
+		else
 		{
-			let match = [gamesPlayed[i].white, gamesPlayed[i].black];
-			match = match.sort();
-			let matchStr = JSON.stringify(match);
-			if(matchCount[matchStr] >= CONST.maximumOfSameMatchPerWeek)
+			//remove pairs that happened more than twice
+			let matchCount: { [matchString: string]: number } = {};
+			for(let i = 0; i < gamesPlayed.length; i++)
 			{
-				gamesPlayed.splice(i, 1);	//removes ith element
-				i--;
+				let match = [gamesPlayed[i].white, gamesPlayed[i].black];
+				match = match.sort();
+				let matchStr = JSON.stringify(match);
+				if(matchCount[matchStr] >= CONST.maximumOfSameMatchPerWeek)
+				{
+					gamesPlayed.splice(i, 1);	//removes ith element
+					i--;
+				}
+				else
+				{
+					matchCount[matchStr] = (matchCount[matchStr] || 0) + 1;
+				}
 			}
-			else
-			{
-				matchCount[matchStr] = (matchCount[matchStr] || 0) + 1;
-			}
+
+			//get attendance updated by games played
+			adjustAttendance(attendance, gamesPlayed);
+
+			//remove an unregistered player if able
+			tryRemoveLowestPlayer(club.Active, attendance);
+
+			//move people down based on attendance
+			Boards.attendanceBasedMovement(club.Active, attendance);
+
+			//update club data with games played
+			consumeGamesPlayed(club, gamesPlayed, attendance);
+
+			//modify attendance based on who was here
+			for(let i = 0; i < club.Active.length; i++)
+				club.Active[i].absent = !attendance[club.Active[i].name];
 		}
-
-		//get attendance updated by games played
-		adjustAttendance(attendance, gamesPlayed);
-
-		//remove an unregistered player if able
-		tryRemoveLowestPlayer(club.Active, attendance);
-
-		//move people down based on attendance
-		Boards.attendanceBasedMovement(club.Active, attendance);
-
-		//update club data with games played
-		consumeGamesPlayed(club, gamesPlayed, attendance);
-
-		//modify attendance based on who was here
-		for(let i = 0; i < club.Active.length; i++)
-			club.Active[i].absent = !attendance[club.Active[i].name];
 
 		if(write)
 		{

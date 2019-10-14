@@ -397,8 +397,6 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		black: string;
 		/** Result for white (1 => win, .5 => draw, 0 => loss)*/
 		result: number;
-		/** Timestamp, may not be used */
-		timestamp: number;
 	}
 
 	/** Resets the games played page */
@@ -419,14 +417,13 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.games.name).getDataRange().getValues();
 		let output: IGamePlayed[] = [];
-		for(let i = 1; i < data.length && data[i][CONST.pages.games.columns.GameNumber]; i++)
+		for(let i = 1; i < data.length; i++)
 		{
 			let currentRow = data[i];
 			output.push({
 				white: currentRow[CONST.pages.games.columns.white],
 				black: currentRow[CONST.pages.games.columns.black],
-				result: CONST.pages.games.resultMap[currentRow[CONST.pages.games.columns.result]],
-				timestamp: Date.now()
+				result: CONST.pages.games.resultMap[currentRow[CONST.pages.games.columns.result]]
 			});
 		}
 		return output;

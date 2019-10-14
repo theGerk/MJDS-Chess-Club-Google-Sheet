@@ -54,10 +54,9 @@ const CONST = {
 		games: {
 			name: 'Games Played',
 			columns: {
-				GameNumber: 0,
-				white: 1,
-				result: 2,
-				black: 3,
+				white: 0,
+				result: 1,
+				black: 2,
             },
             resultMap: {
                 'Win': 1,
