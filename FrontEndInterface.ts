@@ -405,7 +405,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		let spreadsheet = SpreadsheetApp.getActive();
 		let sheet = spreadsheet.getSheetByName(CONST.pages.games.name);
 		let range = sheet.getDataRange();
-		range.offset(1, 1, range.getLastRow() - 1, range.getLastColumn() - 1).clearContent();
+		range.offset(1, 0).clearContent();
 	}
 
 	/**
