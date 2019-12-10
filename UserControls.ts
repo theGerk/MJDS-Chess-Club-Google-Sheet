@@ -14,6 +14,14 @@ function updatePlayers(): void
 		{
 			let currentNewPlayer = newPlayerData[i];
 
+			//allow ussage of newName rather than name for adding player
+			if(!currentNewPlayer.name)
+			{
+				currentNewPlayer.name = currentNewPlayer.newName;
+				currentNewPlayer.newName = '';
+			}
+
+
 			//if the player is already in master list, then update the needed info
 			//TODO throw error and highlight red if a new name conflicts with an existing one
 			if(club.Master.hasOwnProperty(currentNewPlayer.name))
