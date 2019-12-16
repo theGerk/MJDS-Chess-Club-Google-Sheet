@@ -656,7 +656,7 @@ Index: ${i}`);
 	{
 		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.newPlayers.name).getDataRange().getValues();
 		let output: INewPlayerData[] = [];
-		for(let i = 1; i < data.length && data[i][CONST.pages.newPlayers.columns.name]; i++)
+		for(let i = 1; i < data.length; i++)
 		{
 			let currentRow = data[i];
 			output.push({
@@ -667,7 +667,7 @@ Index: ${i}`);
 				registered: currentRow[CONST.pages.newPlayers.columns.registered]
 			});
 		}
-		return output;
+		return output.filter(x => x.name || x.newName);
 	}
 
 	/** Resets the new update player page */
