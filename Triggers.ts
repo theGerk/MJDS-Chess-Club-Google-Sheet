@@ -84,9 +84,6 @@ namespace WeeklyUpdate
 			//remove an unregistered player if able
 			tryRemoveLowestPlayer(club.Active, attendance);
 
-			//move people down based on attendance
-			Boards.attendanceBasedMovement(club.Active, attendance);
-
 			//update club data with games played
 			consumeGamesPlayed(club, gamesPlayed, attendance);
 

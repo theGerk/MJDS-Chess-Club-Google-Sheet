@@ -10,6 +10,15 @@ namespace Boards
 	 */
 	export function doRatingPeriod(games: FrontEnd.IGamePlayed[], club: IClub, attendance: { [name: string]: boolean })
 	{
+		//move people down based on attendance
+		attendanceBasedMovement(club.Active, attendance);
+
+
+		//move based on previous games before any games are played
+		jiggle(club.Active, attendance);
+
+
+		//move based on games
 		for(let i = 0; i < games.length; i++)
 		{
 			let game = games[i];
@@ -76,7 +85,7 @@ namespace Boards
 	 * @param club Array of active players
 	 * @param attendance Attendance map (from player names to if they are here today)
 	 */
-	export function attendanceBasedMovement(club: IPlayer[], attendance: { [name: string]: boolean })
+	function attendanceBasedMovement(club: IPlayer[], attendance: { [name: string]: boolean })
 	{
 		let condition = (player: IPlayer) => player.absent && !attendance[player.name];
 
@@ -88,7 +97,7 @@ namespace Boards
 			let current = club[i];
 
 			if(canMove && condition(current))
-				moveDown(i, club, false);
+				moveDown(i, club);
 
 			//set canMove
 			//if the player is here, then the player above may be able to move
@@ -119,6 +128,7 @@ namespace Boards
 
 			//will only reach this point if everyone between wasn't there
 			movePlayer(winnerIndex, looserIndex, club);
+			jiggle(club, attendance);
 		}
 	}
 
@@ -133,25 +143,12 @@ namespace Boards
 	{
 		if(startIndex < endIndex)
 			for(let i = startIndex; i < endIndex; i++)
-				moveDown(i, club, false);
+				moveDown(i, club);
 		else if(startIndex > endIndex)
 			for(let i = startIndex; i > endIndex; i--)
-				moveUp(i, club, false);
-		jiggle(startIndex, club);
-		jiggle(endIndex, club);
+				moveUp(i, club);
 	}
 
-	/**
-	 * Makes sure there are no iregularities in boards in the entire club, primarily used after doing attendance modification
-	 * @param club entire active club
-	 */
-	function jiggleAll(club: IPlayer[])
-	{
-		for(let i = 0; i < club.length; i++)
-		{
-			jiggle(i, club);
-		}
-	}
 
 	/**
 	 * Should the player's swap boards condition
@@ -166,24 +163,29 @@ namespace Boards
 
 
 	/**
-	 * Recursive jiggle function to do repeated board changes. This solves if board 5 already has two wins against board 3 then when they beat board 4 twice they get jiggled up to board 3.
-	 * @param index target index to jiggle
+	 * This just jiggles the entire player array to make any movements that are possible based on the attendance
 	 * @param club entire active club
+	 * @param attendance the attendance object
 	 */
-	function jiggle(index: number, club: IPlayer[])
+	function jiggle(club: IPlayer[], attendance: { [name: string]: boolean })
 	{
-		//some notes on how this works and why else if is used rather than two ifs.
-		//Statement: It is impossible to every have to both jiggle up and jiggle down.
-		//Proof: This function is only ever called after a movement takes place. If the movement was the player moving upwards then the player immediatly below him used to be above him and thus can not have any stored wins against this player. For the movement in the other direction the same argument is made in the other direction. QED
-		//This means it is optimal to is if else, however there is another reason. A player may be jiggled up and then the new target may be ready to jiggle down. While we would of course want to do this jiggle, this is not the place to do it as it will be covered by the recursion. 
-
-		//jiggle up
-		if(index > 0 && movementCondition(club[index], club[index - 1]))
-			moveUp(index, club, true);
-
-		//jiggle down
-		else if(index < club.length - 1 && movementCondition(club[index + 1], club[index]))
-			moveDown(index, club, true);
+		for(var i = club.length - 1; i >= 1; i--)
+		{
+			if(attendance[club[i].name])
+			{
+				for(var j = i - 1; j >= 0; j--)
+				{
+					if(movementCondition(club[i], club[j]))
+					{
+						movePlayer(i, j, club);
+						i = club.length - 1;
+						break;
+					}
+					else if(attendance[club[j].name])
+						break;
+				}
+			}
+		}
 	}
 
 
@@ -191,9 +193,8 @@ namespace Boards
 	 * Moves a player down one in the club
 	 * @param index index of the player
 	 * @param club active club
-	 * @param doJiggle should recursive jiggling happen?
 	 */
-	function moveDown(index: number, club: IPlayer[], doJiggle: boolean)
+	function moveDown(index: number, club: IPlayer[])
 	{
 		if(index >= 0 && index < club.length - 1)
 		{
@@ -207,12 +208,6 @@ namespace Boards
 			//do swap
 			club[index] = other;
 			club[index + 1] = player;
-
-			if(doJiggle)
-			{
-				jiggle(index, club);
-				jiggle(index + 1, club);
-			}
 		}
 	}
 
@@ -220,10 +215,9 @@ namespace Boards
 	 * moves a player up a board in the club
 	 * @param index target player's index
 	 * @param club entire active club
-	 * @param doJiggle should recursive jiggling happen?
 	 */
-	function moveUp(index: number, club: IPlayer[], doJiggle: boolean)
+	function moveUp(index: number, club: IPlayer[])
 	{
-		moveDown(index - 1, club, doJiggle);
+		moveDown(index - 1, club);
 	}
 }
