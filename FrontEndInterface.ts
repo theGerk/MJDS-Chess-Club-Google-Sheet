@@ -180,12 +180,13 @@ namespace FrontEnd
 		/**
 		 * The row that a player appeared on in the master list.
 		 * Not to be used as an ID, may change between executions unexpectedly.
+		 * Really is only used for debuging
 		 */
 		row: number;
 	}
 
 	/** What a master list object looks like */
-	interface IMasterListObject { [name: string]: IEntryInMasterList }
+	export interface IMasterListObject { [name: string]: IEntryInMasterList }
 
 	/**
 	 * Rewrites the entire master sheet
@@ -287,10 +288,11 @@ namespace FrontEnd
 	 * Gets all the data stored in the master list as a single object
 	 * 
 	 * @returns an object mapping names to their entry in the master list
+	 * @argument sheetName Is the name of the sheet to get data from. Never passed in normally, only for some devwork.
 	 */
-	function getMasterListData()
+	export function getMasterListData(sheetName: string = CONST.pages.master.name)
 	{
-		let data = SpreadsheetApp.getActive().getSheetByName(CONST.pages.master.name).getDataRange().getValues();
+		let data = SpreadsheetApp.getActive().getSheetByName(sheetName).getDataRange().getValues();
 		let output: IMasterListObject = {};
 		for(let i = 1; i < data.length; i++)
 		{
