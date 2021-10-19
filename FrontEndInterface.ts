@@ -186,7 +186,7 @@ namespace FrontEnd
 	}
 
 	/** What a master list object looks like */
-	export interface IMasterListObject { [name: string]: IEntryInMasterList }
+	interface IMasterListObject { [name: string]: IEntryInMasterList }
 
 	/**
 	 * Rewrites the entire master sheet

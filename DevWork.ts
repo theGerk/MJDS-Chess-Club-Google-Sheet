@@ -156,7 +156,7 @@ function mergeStoredwins(a: { [name: string]: number }, b: { [name: string]: num
 function setupMergedMasters() {
 	let A = FrontEnd.getMasterListData("A");
 	let B = FrontEnd.getMasterListData("B");
-	let O: FrontEnd.IMasterListObject = {};
+	let O: { [name: string]: IPlayer } = {};
 	let row = 0;
 	for (let name in A) {
 		if (name in B) {
@@ -165,24 +165,65 @@ function setupMergedMasters() {
 			let b = B[name];
 			O[name] = {
 				gamesPlayed: a.gamesPlayed + b.gamesPlayed,
-				glickoDeviation: (a.glickoDeviation + b.glickoDeviation) / 2,
-				glickoRating: (a.glickoRating + b.glickoRating) / 2,
-				glickoVariance: (a.glickoVariance + b.glickoVariance) / 2,
+				glicko: {
+					deviation: (a.glickoDeviation + b.glickoDeviation) / 2,
+					rating: (a.glickoRating + b.glickoRating) / 2,
+					volatility: (a.glickoVariance + b.glickoVariance) / 2,
+				},
+				absent: false,
+				boardNumber: null,
 				grade: a.grade,
+				isActive: false,
 				group: a.group,
-				lampertRating: (a.lampertRating + b.lampertRating) / 2,
+				lampert: { rating: (a.lampertRating + b.lampertRating) / 2 },
 				name,
-				row: Math.random(),
-				storedWins: mergeStoredwins(a.storedWins, b.storedWins),
+				points: 0,
+				registered: false,
+				storedWins: mergeStoredwins(a.storedWins, b.storedWins);
 			};
 		}
 		else {
-			O[name] = A[name];
+			O[name] = {
+				gamesPlayed: A[name].gamesPlayed,
+				absent: false,
+				isActive: false,
+				boardNumber: null,
+				glicko: {
+					deviation: A[name].glickoDeviation,
+					rating: A[name].glickoRating,
+					volatility: A[name].glickoVariance,
+				},
+				grade: A[name].grade,
+				group: A[name].group,
+				lampert: { rating: A[name].lampertRating },
+				name,
+				points: 0,
+				registered: false,
+				storedWins: A[name].storedWins,
+			};
 		}
 	}
 	for (let name in B) {
 		if (!(name in A)) {
-			O[name] = B[name];
+			O[name] = {
+				gamesPlayed: B[name].gamesPlayed,
+				absent: false,
+				isActive: false,
+				boardNumber: null,
+				glicko: {
+					deviation: B[name].glickoDeviation,
+					rating: B[name].glickoRating,
+					volatility: B[name].glickoVariance,
+				},
+				grade: B[name].grade,
+				group: B[name].group,
+				lampert: { rating: B[name].lampertRating },
+				name,
+				points: 0,
+				registered: false,
+				storedWins: B[name].storedWins,
+			};
 		}
 	}
+	FrontEnd.setClub({ Master: O, Active: [] });
 }
