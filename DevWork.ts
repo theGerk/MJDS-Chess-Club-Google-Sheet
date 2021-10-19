@@ -166,7 +166,7 @@ function setupMergedMasters() {
 			O[name] = {
 				gamesPlayed: a.gamesPlayed + b.gamesPlayed,
 				glicko: {
-					deviation: (a.glickoDeviation + b.glickoDeviation) / 2,
+					deviation: (a.glickoDeviation == null) ? b.glickoDeviation : (b.glickoDeviation == null ? a.glickoDeviation : ((a.glickoDeviation + b.glickoDeviation) / 2)),
 					rating: (a.glickoRating + b.glickoRating) / 2,
 					volatility: (a.glickoVariance + b.glickoVariance) / 2,
 				},
@@ -203,7 +203,7 @@ function setupMergedMasters() {
 			};
 		}
 	}
-	for (let name in B) {
+	for (var name in B) {
 		if (!(name in A)) {
 			O[name] = {
 				gamesPlayed: B[name].gamesPlayed,
@@ -225,5 +225,5 @@ function setupMergedMasters() {
 			};
 		}
 	}
-	FrontEnd.setClub({ Master: O, Active: [] });
+	FrontEnd.setClub({ Master: O, Active: [O[name]] }, true);
 }
