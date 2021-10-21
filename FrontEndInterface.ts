@@ -610,10 +610,13 @@ Index: ${i}`);
 		return output;
 	}
 
-	/** gets all data from the active players page */
-	function getActivePlayerData()
+	/** gets all data from the active players page
+	 * @argument sheetName Is the name of the sheet to get data from.Never passed in normally, only for some devwork.
+	 * @returns active player data ordered by board number ascending
+	 */
+	export function getActivePlayerData(sheetName = CONST.pages.active.name)
 	{
-		let range = SpreadsheetApp.getActive().getSheetByName(CONST.pages.active.name).getDataRange();
+		let range = SpreadsheetApp.getActive().getSheetByName(sheetName).getDataRange();
 		let data = range.getValues();
 		let backgrounds = range.getBackgrounds();
 		let output: IActivePlayerData[] = [];
@@ -635,7 +638,7 @@ Index: ${i}`);
 				registered: backgrounds[i][CONST.pages.active.columns.name] === CONST.pages.active.regcolors.registered,	//uses background color to determine if a player is registered
 			});
 		}
-		return output.sort((r)=> r.board);
+		return output.sort((a,b) => a.board - b.board);
 	}
 
 	/** All data for a single row from new player page */
@@ -666,7 +669,7 @@ Index: ${i}`);
 				grade: currentRow[CONST.pages.newPlayers.columns.grade],
 				group: currentRow[CONST.pages.newPlayers.columns.group],
 				newName: currentRow[CONST.pages.newPlayers.columns.newName],
-				registered: currentRow[CONST.pages.newPlayers.columns.registered]
+				registered: currentRow[CONST.pages.newPlayers.columns.registered],
 			});
 		}
 		return output.filter(x => x.name || x.newName);

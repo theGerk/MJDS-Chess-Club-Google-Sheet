@@ -156,6 +156,20 @@ function mergeStoredwins(a: { [name: string]: number }, b: { [name: string]: num
 function setupMergedMasters() {
 	let A = FrontEnd.getMasterListData("A");
 	let B = FrontEnd.getMasterListData("B");
+	let activeA = FrontEnd.getActivePlayerData("printA");
+	let activeB = FrontEnd.getActivePlayerData("printB");
+
+	interface IBoardMetadata {
+		days: number,
+		board: number,
+		lampertRating: number,
+		glickoRating: number,
+		random: number,
+	}
+
+	let boardmetadata: { [name: string]: IBoardMetadata } = {};
+
+
 	let O: { [name: string]: IPlayer } = {};
 	let row = 0;
 	for (let name in A) {
@@ -179,7 +193,7 @@ function setupMergedMasters() {
 				name,
 				points: 0,
 				registered: false,
-				storedWins: mergeStoredwins(a.storedWins, b.storedWins);
+				storedWins: mergeStoredwins(a.storedWins, b.storedWins),
 			};
 		}
 		else {
@@ -225,5 +239,45 @@ function setupMergedMasters() {
 			};
 		}
 	}
-	FrontEnd.setClub({ Master: O, Active: [O[name]] }, true);
+
+	for (let player of activeA) {
+		boardmetadata[player.name] = {
+			days: 1,
+			board: player.board,
+			glickoRating: O[player.name].glicko.rating,
+			lampertRating: O[player.name].lampert.rating,
+			random: Math.random(),
+		};
+	}
+	for (let playerName in activeB) {
+		let player = activeB[playerName]
+		if (playerName in boardmetadata) {
+			boardmetadata[playerName].board += player.board;
+			boardmetadata[playerName].glickoRating += O[playerName].glicko.rating;
+			boardmetadata[playerName].days = 2;
+			boardmetadata[playerName].lampertRating += O[playerName].lampert.rating;
+		} else {
+			boardmetadata[player.name] = {
+				days: 1,
+				board: player.board,
+				glickoRating: O[player.name].glicko.rating,
+				lampertRating: O[player.name].lampert.rating,
+				random: Math.random(),
+			};
+		}
+	}
+
+	let active = Benji.objToArray_dropKey(O)
+		.filter(x => x.name in boardmetadata)
+		.sort(Benji.ordering(
+			{ extractor: x => boardmetadata[x.name].days, ordering: Benji.OrderingFunctions.Descending },
+			{ extractor: x => boardmetadata[x.name].board, ordering: Benji.OrderingFunctions.Ascending },
+			{ extractor: x => boardmetadata[x.name].lampertRating, ordering: Benji.OrderingFunctions.Descending },
+			{ extractor: x => boardmetadata[x.name].glickoRating, ordering: Benji.OrderingFunctions.Descending },
+			{ extractor: x => boardmetadata[x.name].random, ordering: (a, b) => a - b }
+		));
+	for (let i = 0; i < active.length; i++) {
+		active[i].boardNumber = i + 1;
+	}
+	FrontEnd.setClub({ Master: O, Active: active }, true);
 }
