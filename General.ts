@@ -133,12 +133,6 @@ namespace Benji {
 		return array;
 	}
 
-
-	export enum OrderingDirection {
-		Ascending,
-		Descending,
-	}
-
 	export interface orderingArgument<T, O> {
 		extractor: (elem: T) => O;
 		ordering: (a: O, b: O) => number;
@@ -168,7 +162,8 @@ namespace Benji {
 		return (a: T, b: T) => {
 			const length = args.length;
 			for (var i = 0; i < length; i++) {
-				let response = (<((a, b) => number)>args[i].ordering)(a, b);
+				const extractor = args[i].extractor;
+				const response = args[i].ordering(extractor(a), extractor(b));
 				if (response != 0)
 					return response;
 			}

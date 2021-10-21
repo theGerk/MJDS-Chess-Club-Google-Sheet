@@ -189,7 +189,7 @@ function setupMergedMasters() {
 				grade: a.grade,
 				isActive: false,
 				group: a.group,
-				lampert: { rating: (a.lampertRating + b.lampertRating) / 2 },
+				lampert: { rating: Math.ceil((a.lampertRating + b.lampertRating) / 2) },
 				name,
 				points: 0,
 				registered: false,
@@ -268,7 +268,7 @@ function setupMergedMasters() {
 	}
 
 	let active = Benji.objToArray_dropKey(O)
-		.filter(x => x.name in boardmetadata)
+		.filter(x => x.grade == 8 && x.gamesPlayed > 0 && x.name in boardmetadata)
 		.sort(Benji.ordering(
 			{ extractor: x => boardmetadata[x.name].days, ordering: Benji.OrderingFunctions.Descending },
 			{ extractor: x => boardmetadata[x.name].board, ordering: Benji.OrderingFunctions.Ascending },
