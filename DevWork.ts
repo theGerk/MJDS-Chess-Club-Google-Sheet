@@ -281,3 +281,16 @@ function setupMergedMasters() {
 	}
 	FrontEnd.setClub({ Master: O, Active: active }, true);
 }
+
+function deactiveThoseWhoHaveNotPlayedAGame() {
+	let club = FrontEnd.getClub();
+	let writeLoc = 0;
+	for (let i = 0; i < club.Active.length; i++) {
+		if (club.Active[i].gamesPlayed > 0)
+			club.Active[writeLoc++] = club.Active[i];
+		else
+			club.Active[i].isActive = false;
+	}
+	club.Active.length = writeLoc;
+	FrontEnd.setClub(club, true);
+}

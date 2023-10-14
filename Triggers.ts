@@ -80,6 +80,16 @@ namespace WeeklyUpdate {
 			//modify attendance based on who was here
 			for (let i = 0; i < club.Active.length; i++)
 				club.Active[i].absent = !attendance[club.Active[i].name];
+
+			//remove anyone without any games played
+			let writeLoc = 0;
+			for (let i = 0; i < club.Active.length; i++) {
+				if (club.Active[i].gamesPlayed > 0)
+					club.Active[writeLoc++] = club.Active[i];
+				else
+					club.Active[i].isActive = false;
+			}
+			club.Active.length = writeLoc;
 		}
 
 		if (write) {
