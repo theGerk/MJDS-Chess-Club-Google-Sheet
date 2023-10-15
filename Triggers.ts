@@ -82,16 +82,7 @@ namespace WeeklyUpdate {
 				club.Active[i].absent = !attendance[club.Active[i].name];
 
 			//remove anyone without any games played
-			let writeLoc = 0;
-			for (let i = 0; i < club.Active.length; i++) {
-				if (club.Active[i].gamesPlayed > 0) {
-					club.Active[i].boardNumber = writeLoc + 1;
-					club.Active[writeLoc++] = club.Active[i];
-				}
-				else
-					club.Active[i].isActive = false;
-			}
-			club.Active.length = writeLoc;
+			deactivatePlayers(club.Active, player => player.boardNumber == 0);
 		}
 
 		if (write) {
