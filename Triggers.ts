@@ -74,15 +74,15 @@ namespace WeeklyUpdate {
 			//remove an unregistered player if able
 			tryRemoveLowestPlayer(club.Active, attendance);
 
+			//remove anyone without any games played
+			deactivatePlayers(club.Active, player => player.boardNumber == 0);
+			
 			//update club data with games played
 			consumeGamesPlayed(club, gamesPlayed, attendance);
 
 			//modify attendance based on who was here
 			for (let i = 0; i < club.Active.length; i++)
 				club.Active[i].absent = !attendance[club.Active[i].name];
-
-			//remove anyone without any games played
-			deactivatePlayers(club.Active, player => player.boardNumber == 0);
 		}
 
 		if (write) {
