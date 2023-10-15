@@ -153,4 +153,23 @@ namespace WeeklyUpdate {
 		//go through all games and try and make movements
 		Boards.doRatingPeriod(games, club, attendanceObj);
 	}
+
+	/**
+	 * This deactivates players based on a predicate.
+	 * @param activePlayers The active players array
+	 * @param shouldRemove The predicate to remove players by
+	 */
+	function deactivatePlayers(activePlayers: IPlayer[], shouldRemove: (player: IPlayer) => boolean) {
+		let writeLoc = 0;
+		for (let i = 0; i < activePlayers.length; i++) {
+			const player = activePlayers[i];
+			if (shouldRemove(player))
+				player.isActive = false;
+			else {
+				player.boardNumber = writeLoc + 1;
+				activePlayers[writeLoc++] = player;
+			}
+		}
+		activePlayers.length = writeLoc;
+	}
 }
