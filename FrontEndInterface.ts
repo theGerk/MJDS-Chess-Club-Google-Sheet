@@ -1,6 +1,6 @@
 ﻿/// <reference path="Constants.ts"/>
 
-/** Namespace for functions that deal with the google sheet directly */
+/** Namespace for functions that deal with the Google Sheet directly */
 namespace FrontEnd
 {
 	/** 
@@ -93,7 +93,7 @@ namespace FrontEnd
 	//Not sure if ever to be used
 	/**
 	 * Converts input to a map from names to win count based on board numbers in club object
-	 * @param input An array with meaning that player on board i + 1 has been beated input[i] times.
+	 * @param input An array with meaning that player on board i + 1 has been beaten input[i] times.
 	 * @param club An array with the meaning that player at club[i] has board i in the club.
 	 */
 	function convertStoredWinsArrayToObject(input: number[], club: IPlayer[])
@@ -154,7 +154,7 @@ namespace FrontEnd
 		name: string;
 		/** The player's group (may be blank for no group). */
 		group: string;
-		/** The player's grade (K => kindergarden, A => above 12th grade, Pre-K => pre-kindergarden). */
+		/** The player's grade (K => kindergarten, A => above 12th grade, Pre-K => pre-kindergarten). */
 		grade: number | string;
 		/** The player's Lampert rating, using system developed by Larry Lampert. */
 		lampertRating: number;
@@ -180,7 +180,7 @@ namespace FrontEnd
 		/**
 		 * The row that a player appeared on in the master list.
 		 * Not to be used as an ID, may change between executions unexpectedly.
-		 * Really is only used for debuging
+		 * Really is only used for debugging
 		 */
 		row: number;
 	}
@@ -196,7 +196,7 @@ namespace FrontEnd
 	 */
 	function writeMasterListData(clubData: { [name: string]: IPlayer }, write?: boolean)
 	{
-		//Without the Set class, using an object as a set seems sufficent
+		//Without the Set class, using an object as a set seems sufficient
 
 		//maps old name to new name
 		let oldToNew_NameMap: { [name: string]: string } = {};
@@ -241,7 +241,7 @@ namespace FrontEnd
 			for(let opponentName in readRow.storedWins)
 			{
 				let value = readRow.storedWins[opponentName];
-				//this value is used as a work around for now, maybe later fix it so it can go as high as desried.
+				//this value is used as a work around for now, maybe later fix it so it can go as high as desired.
 				if(value > 9)
 					value = 9;
 
@@ -319,7 +319,7 @@ namespace FrontEnd
 					let number = parseInt(splitOnSpace[splitOnSpace.length - 1]);
 
 					//if the number was not included set the number to 1, and combine the entire array for the name otherwise just combine everything but the last part in the array
-					if(number === NaN)
+					if(isNaN(number))
 						number = 1;
 					else
 						splitOnSpace.pop();
@@ -509,7 +509,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		name: string;
 		/** Board number, this is unique but also changes */
 		board: number;
-		/** array refering the the number of wins against people above them and losses to those below */
+		/** array referring to the number of wins against people above them and losses to those below */
 		storedWins: number[];
 		/** The Lampert Rating */
 		lampertRating: number;
@@ -523,7 +523,7 @@ Press CANCEL if you want to simple stop the script and fix the issue.`, ui.Butto
 		points: number;
 		/** Did they miss last session? */
 		absent: boolean;
-		/** Are the regiestered? */
+		/** Are they registered? */
 		registered: boolean;
 	}
 
@@ -683,7 +683,7 @@ Index: ${i}`);
 	}
 
 	/**
-	 * records games played onto a seperate sheet, each row referes to a single rating period and is encoded using JSON.stringify
+	 * records games played onto a separate sheet, each row refers to a single rating period and is encoded using JSON.stringify
 	 * @param weekObj the games for this rating period
 	 */
 	export function addGameLog(weekObj: { games: IGamePlayed[], attendance: { [name: string]: boolean } })
