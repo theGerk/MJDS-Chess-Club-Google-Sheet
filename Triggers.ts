@@ -26,6 +26,31 @@ function gradeUpdate() {
 	}
 }
 
+function mergePlayers(correctName: string, falseName: string) {
+	let club = FrontEnd.getClub();
+	if (!club.Master.hasOwnProperty(correctName))
+		throw `${correctName} is not found`;
+	if (!club.Master.hasOwnProperty(falseName))
+		throw `${falseName} is not found`;
+	let correctPlayer = club.Master[correctName];
+	let falsePlayer = club.Master[falseName];
+
+	var history = FrontEnd.getHistory();
+	for (let i = history.length - 1; i >= 0; --i) {
+		let current = history[i];
+		let games = current.games;
+		for (let i = games.length - 1; i >= 0; --i) {
+			if (games[i].black == falseName)
+				games[i].black = correctName;
+			if (games[i].white == falseName)
+				games[i].white = correctName;
+		}
+		games = games.filter(x => x.white != x.black);
+		let attendance = current.attendance;
+		attendance[correctName] ||= attendance[falseName];
+		delete attendance[falseName];
+	}
+}
 
 function weeklyUpdate() {
 	WeeklyUpdate.doAll(true);
